@@ -4,11 +4,9 @@ import UIKit
 final class GameViewController: UIViewController {
     private let textures = PixelTextures()
     private let gameView = SKView()
-    private lazy var hud = GameHUD(textures: textures)
-    private lazy var toolbar = GameToolbar(textures: textures)
+    private let hud = GameHUD()
+    private let toolbar = GameToolbar()
     private let message = UILabel()
-    private let hint = UILabel()
-    private let situation = UILabel()
     private var gameScene: GameScene?
     private var hasStarted = false
 
@@ -18,7 +16,7 @@ final class GameViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = GamePalette.panel
+        view.backgroundColor = .systemBackground
         gameView.preferredFramesPerSecond = 60
         gameView.ignoresSiblingOrder = true
         gameView.shouldCullNonVisibleNodes = true
@@ -66,42 +64,18 @@ final class GameViewController: UIViewController {
         message.isHidden = true
         message.isUserInteractionEnabled = false
         message.accessibilityIdentifier = "gameMessage"
-        hint.text = "TAP A TILE TO MOVE"
-        hint.textColor = GamePalette.text
-        hint.backgroundColor = GamePalette.background
-        hint.font = .monospacedSystemFont(ofSize: 10, weight: .medium)
-        hint.textAlignment = .center
-        hint.layer.borderColor = GamePalette.border.cgColor
-        hint.layer.borderWidth = 1
-        situation.textColor = GamePalette.text
-        situation.backgroundColor = GamePalette.background
-        situation.font = .monospacedSystemFont(ofSize: 10, weight: .medium)
-        situation.textAlignment = .center
-        situation.accessibilityIdentifier = "gateStatus"
-        for label in [situation, hint] {
-            label.translatesAutoresizingMaskIntoConstraints = false
-            label.isUserInteractionEnabled = false
-            gameView.addSubview(label)
-        }
         // Screen-centered, independent of camera movement and the safe-area game viewport.
         message.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(message)
         NSLayoutConstraint.activate([
             message.centerXAnchor.constraint(equalTo: view.centerXAnchor), message.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            message.widthAnchor.constraint(equalTo: view.widthAnchor, constant: -24),
-            situation.topAnchor.constraint(equalTo: gameView.topAnchor, constant: 12),
-            situation.centerXAnchor.constraint(equalTo: gameView.centerXAnchor), situation.widthAnchor.constraint(equalToConstant: 230),
-            situation.heightAnchor.constraint(equalToConstant: 26),
-            hint.centerXAnchor.constraint(equalTo: gameView.centerXAnchor), hint.bottomAnchor.constraint(equalTo: gameView.bottomAnchor, constant: -16),
-            hint.widthAnchor.constraint(equalToConstant: 192), hint.heightAnchor.constraint(equalToConstant: 28)
+            message.widthAnchor.constraint(equalTo: view.widthAnchor, constant: -24)
         ])
     }
 
     private func startNewGame() {
         guard gameView.bounds.width > 0 else { return }
         message.isHidden = true
-        hint.isHidden = false
-        hint.text = "TAP A TILE TO MOVE"
         let seed: UInt64?
         #if DEBUG
         let arguments = ProcessInfo.processInfo.arguments
@@ -114,7 +88,6 @@ final class GameViewController: UIViewController {
         let scene = GameScene(size: gameView.bounds.size, textures: textures, seed: seed)
         scene.onStateChange = { [weak self] simulation in self?.updateHUD(simulation) }
         scene.onDeath = { [weak self] in self?.showDeath() }
-        scene.onPlayerMove = { [weak self] in self?.hint.isHidden = true }
         gameScene = scene
         gameView.presentScene(scene)
         #if DEBUG
@@ -125,9 +98,7 @@ final class GameViewController: UIViewController {
     }
 
     private func updateHUD(_ simulation: Simulation) {
-        hud.update(hp: simulation.player.health.hp, maximum: simulation.player.health.maximumHP)
-        situation.text = simulation.world.gate.isDestroyed ? "GATE BREACHED · THEY ARE INSIDE" : "IRON GATE  \(simulation.world.gate.hp) / \(simulation.world.gate.maximumHP)"
-        situation.textColor = simulation.world.gate.isDestroyed ? GamePalette.red : GamePalette.text
+        hud.update(hp: simulation.player.health.hp)
         toolbar.update(isPaused: simulation.isPaused, gameOver: simulation.isGameOver)
     }
 
@@ -148,24 +119,23 @@ final class GameViewController: UIViewController {
         toolbar.update(isPaused: simulation.isPaused, gameOver: simulation.isGameOver)
         guard !simulation.isGameOver else { return }
         message.isHidden = !simulation.isPaused
-        if simulation.isPaused { setMessage("Paused", size: 36) }
+        if simulation.isPaused {
+            message.attributedText = nil
+            message.font = .systemFont(ofSize: 36, weight: .semibold)
+            message.textColor = .label
+            message.text = "Paused"
+        }
     }
 
     private func showDeath() {
-        setMessage("You died", size: 48)
-        message.isHidden = false
-        hint.text = "NEW GAME TO BEGIN AGAIN"
-        hint.isHidden = false
-        if let simulation = gameScene?.simulation { updateHUD(simulation) }
-        UIAccessibility.post(notification: .announcement, argument: "You died. Start a new game to try again.")
-    }
-
-    private func setMessage(_ text: String, size: CGFloat) {
-        message.attributedText = NSAttributedString(string: text, attributes: [
-            .font: UIFont.systemFont(ofSize: size, weight: .heavy),
+        message.attributedText = NSAttributedString(string: "You died", attributes: [
+            .font: UIFont.systemFont(ofSize: 48, weight: .bold),
             .foregroundColor: GamePalette.purple,
-            .strokeColor: GamePalette.white,
-            .strokeWidth: -3.5
+            .strokeColor: UIColor.white,
+            .strokeWidth: -1.0
         ])
+        message.isHidden = false
+        if let simulation = gameScene?.simulation { updateHUD(simulation) }
+        UIAccessibility.post(notification: .announcement, argument: "You died")
     }
 }

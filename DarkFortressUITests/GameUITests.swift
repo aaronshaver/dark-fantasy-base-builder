@@ -14,10 +14,8 @@ final class GameUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Paused"].exists)
         XCTAssertGreaterThan(pause.frame.minX, app.buttons["raise"].frame.minX)
         let frozenHealth = app.staticTexts["playerHealth"].label
-        let frozenGate = app.staticTexts["gateStatus"].label
         Thread.sleep(forTimeInterval: 2)
         XCTAssertEqual(app.staticTexts["playerHealth"].label, frozenHealth)
-        XCTAssertEqual(app.staticTexts["gateStatus"].label, frozenGate)
         let pausedShot = XCTAttachment(screenshot: app.screenshot())
         pausedShot.name = "Portrait world and play toggle"
         pausedShot.lifetime = .keepAlways
@@ -25,14 +23,14 @@ final class GameUITests: XCTestCase {
         pause.tap()
         XCTAssertEqual(pause.label, "Pause")
         XCTAssertTrue(app.staticTexts["You died"].waitForExistence(timeout: 65))
-        XCTAssertEqual(app.staticTexts["playerHealth"].label, "Health, 0 of 30")
+        XCTAssertEqual(app.staticTexts["playerHealth"].label, "Health, 0")
         let deathShot = XCTAttachment(screenshot: app.screenshot())
         deathShot.name = "You died"
         deathShot.lifetime = .keepAlways
         add(deathShot)
         app.buttons["newGame"].tap()
         XCTAssertFalse(app.staticTexts["You died"].exists)
-        XCTAssertEqual(app.staticTexts["playerHealth"].label, "Health, 30 of 30")
+        XCTAssertEqual(app.staticTexts["playerHealth"].label, "Health, 30")
         XCTAssertEqual(pause.label, "Pause")
     }
 }

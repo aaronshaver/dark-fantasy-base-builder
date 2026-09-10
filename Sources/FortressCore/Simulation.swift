@@ -156,8 +156,9 @@ final class Simulation {
                     if world.gate.isDestroyed { events.append(.gateDestroyed) }
                 }
             case .player:
-                // Only the attacker must stand still. Check reach again when its swing lands.
-                if player.isAlive && inMeleeRange(index) {
+                // A swing commits at melee range while the attacker stands on its tile.
+                // Stepping away during the short wind-up does not cancel an earned hit.
+                if player.isAlive {
                     actors[0].health.damage(GameBalance.playerDamage)
                     events.append(.playerDamaged(player.health.hp))
                     if !player.isAlive { endGame() }

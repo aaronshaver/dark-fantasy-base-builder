@@ -18,10 +18,6 @@ final class PixelTextures {
         return texture
     }
 
-    func image(_ name: String) -> UIImage {
-        UIImage(cgImage: texture(name).cgImage(), scale: 1, orientation: .up)
-    }
-
     func preload(completion: @escaping () -> Void) {
         atlas.preload(completionHandler: completion)
     }

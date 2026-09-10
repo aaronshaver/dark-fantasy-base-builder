@@ -8,17 +8,14 @@ final class GameScene: SKScene {
     private let pathOverlay: PathOverlay
     private var actorNodes: [Int: ActorNode] = [:]
     private var gateNode = SKSpriteNode()
-    private let gateHealth = SKSpriteNode(color: GamePalette.red, size: CGSize(width: 24, height: 2))
     private var lastUpdate: TimeInterval?
     private var cameraReady = false
     private var gateStage = -1
     private var shownHP = -1
-    private var shownGateHP = -1
     private var didShowDeath = false
     private var pixelsPerArtPixel: CGFloat = 5
     var onStateChange: ((Simulation) -> Void)?
     var onDeath: (() -> Void)?
-    var onPlayerMove: (() -> Void)?
 
     init(size: CGSize, textures: PixelTextures, seed: UInt64? = nil) {
         self.textures = textures
@@ -61,14 +58,6 @@ final class GameScene: SKScene {
         chair.zRotation = rotation(world.chair.direction)
         gateNode = sprite("gate_0", at: world.gateTile, z: 10)
         if world.gateDirection == .east || world.gateDirection == .west { gateNode.zRotation = .pi / 2 }
-        let healthBacking = SKSpriteNode(color: GamePalette.background, size: CGSize(width: 28, height: 5))
-        healthBacking.position = CGPoint(x: gateNode.position.x, y: gateNode.position.y + 20)
-        healthBacking.zPosition = 45
-        healthBacking.name = "gateHealthBacking"
-        worldNode.addChild(healthBacking)
-        gateHealth.anchorPoint = CGPoint(x: 0, y: 0.5)
-        gateHealth.position = CGPoint(x: -12, y: 0)
-        healthBacking.addChild(gateHealth)
         worldNode.addChild(pathOverlay)
         for actor in simulation.actors {
             let node = ActorNode(textures: textures)
@@ -119,16 +108,13 @@ final class GameScene: SKScene {
             gateNode.texture = textures.texture("gate_\(stage)")
             gateStage = stage
         }
-        gateHealth.xScale = CGFloat(simulation.world.gate.hp) / CGFloat(simulation.world.gate.maximumHP)
-        worldNode.childNode(withName: "gateHealthBacking")?.isHidden = simulation.world.gate.isDestroyed
         let player = simulation.player.position
         let target = CGPoint(x: player.x * 32, y: player.y * 32)
         // Exact follow and physical-pixel alignment preserve crisp scenery during movement.
         followCamera.position = CGPoint(x: (target.x * pixelsPerArtPixel).rounded() / pixelsPerArtPixel,
                                         y: (target.y * pixelsPerArtPixel).rounded() / pixelsPerArtPixel)
-        if shownHP != simulation.player.health.hp || shownGateHP != simulation.world.gate.hp || !cameraReady {
+        if shownHP != simulation.player.health.hp || !cameraReady {
             shownHP = simulation.player.health.hp
-            shownGateHP = simulation.world.gate.hp
             cameraReady = true
             onStateChange?(simulation)
         }
@@ -163,7 +149,6 @@ final class GameScene: SKScene {
         let tile = Tile(x: Int(floor((point.x + 16) / 32)), y: Int(floor((point.y + 16) / 32)))
         if simulation.movePlayer(to: tile) {
             pathOverlay.synchronize(simulation.player)
-            onPlayerMove?()
         }
     }
 }

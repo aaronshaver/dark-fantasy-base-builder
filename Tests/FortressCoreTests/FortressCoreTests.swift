@@ -173,15 +173,33 @@ final class FortressCoreTests: XCTestCase {
         XCTAssertTrue(reset.events.isEmpty)
     }
 
-    func testPlayerCannotAttackAndEnemiesAreFivePercentFaster() {
+    func testPlayerCannotAttackAndEnemiesAreFiftyPercentFaster() {
         let simulation = Simulation(seed: 1)
         XCTAssertNil(simulation.player.attack)
-        XCTAssertEqual(GameBalance.enemyTilesPerSecond / GameBalance.playerTilesPerSecond, 1.05, accuracy: 0.0001)
+        XCTAssertEqual(GameBalance.enemyTilesPerSecond / GameBalance.playerTilesPerSecond, 1.5, accuracy: 0.0001)
         for _ in 0..<2000 {
             simulation.advance(by: 1.0 / 60)
             XCTAssertNil(simulation.player.attack)
             XCTAssertTrue(simulation.enemies.allSatisfy { $0.health.hp == $0.health.maximumHP })
         }
+    }
+
+    func testRunningAwayDoesNotCancelCommittedMeleeAttack() {
+        var world = World(seed: 14)
+        world.gate.damage(world.gate.hp)
+        let player = Actor(id: 0, kind: .necromancer, tile: .zero,
+                           health: Destructible(maximumHP: 30, hp: 30))
+        let enemy = Actor(id: 1, kind: .human, tile: Tile(x: 0, y: -1),
+                          health: Destructible(maximumHP: 20, hp: 20))
+        let simulation = Simulation(world: world, actors: [player, enemy])
+        simulation.advance(by: GameBalance.simulationStep)
+        XCTAssertNotNil(simulation.enemies.first?.attack)
+        XCTAssertTrue(simulation.movePlayer(to: Tile(x: 0, y: 2)))
+        for _ in 0..<22 { simulation.advance(by: GameBalance.simulationStep) }
+        XCTAssertNotNil(simulation.player.movement)
+        XCTAssertEqual(simulation.player.health.hp, 30 - GameBalance.playerDamage)
+        XCTAssertEqual(simulation.enemies.first?.tile, enemy.tile)
+        XCTAssertNil(simulation.enemies.first?.movement)
     }
 
     private func gateScenario(_ world: World) -> Simulation {

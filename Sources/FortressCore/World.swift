@@ -91,7 +91,7 @@ enum GameBalance {
     static let playerHP = 30
     static let gateHP = 90
     static let playerTilesPerSecond = 2.0
-    static let enemyTilesPerSecond = playerTilesPerSecond * 1.05
+    static let enemyTilesPerSecond = playerTilesPerSecond * 1.5
     static let attackInterval = 1.0
     static let attackWindup = 1.0 / 3.0
     static let gateDamage = 3  // Three attackers × 3 damage × 10 volleys = 90 HP.

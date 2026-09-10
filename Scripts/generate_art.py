@@ -70,48 +70,106 @@ class Art:
 
 
 def ground():
+    # Four authored arrangements per material, with shared edges and fixed orientation.
+    joints = [[21, 8, 27, 13], [6, 25, 12, 29], [14, 30, 5, 22], [28, 13, 23, 7]]
+    boards = [
+        ['wood', 'wood_mid', 'wood', 'wood_mid'],
+        ['wood_mid', 'wood_light', 'wood', 'wood_mid'],
+        ['wood', 'wood', 'wood_mid', 'wood'],
+        ['wood_mid', 'wood', 'wood_light', 'wood'],
+    ]
+    stone_courses = [
+        [(0, 10, [-5, 13, 32]), (10, 20, [-1, 8, 25, 36]), (20, 30, [-7, 18, 36])],
+        [(0, 15, [-2, 21, 35]), (15, 30, [-8, 10, 33])],
+        [(0, 8, [-5, 9, 25, 37]), (8, 20, [-1, 18, 34]), (20, 30, [-5, 6, 22, 36])],
+        [(0, 12, [-7, 16, 34]), (12, 23, [-2, 7, 28, 38]), (23, 30, [-9, 20, 36])],
+    ]
     for variant in range(4):
         rng = random.Random(170 + variant)
         a = Art('wood')
-        for y in range(0, 32, 8):
-            a.rect(0, y, 32, 1, 'wood_seam')
+        for row, y in enumerate(range(0, 32, 8)):
+            a.rect(0, y + 1, 32, 7, boards[variant][row])
+            a.rect(0, y, 32, 1, 'wood_dark')
             a.rect(0, y + 1, 32, 1, 'wood_light')
-            seam = (variant * 7 + y * 2 + 9) % 32
-            a.line(seam, y, seam, y + 7, 'wood_dark')
+            seam = joints[variant][row]
+            a.line(seam, y, seam, y + 7, 'wood_seam')
             a.dot(seam + 2, y + 2, 'wood_dark')
             a.dot(seam - 2, y + 6, 'wood_dark')
-            for _ in range(4):
-                x, yy = rng.randrange(32), y + rng.randrange(3, 7)
-                a.line(x, yy, min(31, x + rng.randrange(3, 11)), yy, rng.choice(['wood_mid', 'wood_light']))
-        kx, ky = rng.randrange(4, 27), rng.choice([4, 12, 20, 28])
-        a.line(kx - 3, ky, kx + 3, ky, 'wood_dark')
-        a.line(kx - 1, ky + 1, kx + 2, ky + 1, 'wood_glint')
+            for _ in range(3):
+                x, yy = rng.randrange(27), y + rng.randrange(3, 7)
+                a.line(x, yy, min(31, x + rng.randrange(6, 15)), yy,
+                       rng.choice(['wood_seam', 'wood_light', 'wood_glint']))
+        # Knots and splits have distinct silhouettes, not just different noise seeds.
+        knots = [[(25, 20, 2)], [(10, 12, 4)], [(22, 5, 3), (8, 27, 2)], [(20, 20, 4)]]
+        for x, y, radius in knots[variant]:
+            a.line(x - radius, y, x + radius, y, 'wood_dark')
+            a.line(x - radius + 1, y - 1, x + radius - 1, y - 1, 'wood_seam')
+            a.line(x - radius, y + 1, x + radius, y + 1, 'wood_glint')
+            a.dot(x, y, 'ink')
+        if variant == 1:
+            a.line(18, 26, 29, 26, 'wood_dark')
+            a.line(14, 27, 21, 27, 'wood_dark')
+        elif variant == 2:
+            a.line(2, 12, 20, 12, 'wood_seam')
+            a.line(7, 11, 15, 11, 'wood_dark')
+        elif variant == 3:
+            a.line(4, 4, 24, 4, 'wood_dark')
+            a.line(13, 5, 28, 5, 'wood_dark')
+            a.line(12, 18, 23, 18, 'wood_glint')
         a.save(f'wood_{variant}')
 
         a = Art('grass')
-        for _ in range(52):
+        # Irregular patches stay inside each tile so neighboring tiles blend at the edges.
+        patches = [
+            [(9, 22, 7, 4, 'grass_mid')],
+            [(12, 12, 9, 6, 'grass_mid'), (23, 24, 5, 3, 'grass_light')],
+            [(14, 20, 9, 5, 'grass_dark'), (21, 9, 5, 3, 'grass_mid')],
+            [(10, 11, 7, 5, 'grass_light'), (21, 23, 8, 5, 'grass_mid')],
+        ]
+        for cx, cy, rx, ry, color in patches[variant]:
+            for y in range(cy - ry, cy + ry + 1):
+                for x in range(cx - rx, cx + rx + 1):
+                    if ((x - cx) / rx) ** 2 + ((y - cy) / ry) ** 2 < rng.uniform(0.65, 1.1):
+                        a.dot(x, y, color)
+        for _ in range(25):
             x, y = rng.randrange(32), rng.randrange(32)
             a.rect(x, y, rng.randrange(1, 4), 1, rng.choice(['grass_dark', 'grass_mid']))
-        for _ in range(17):
-            x, y = rng.randrange(1, 30), rng.randrange(3, 31)
-            a.line(x, y, x, y - 2, 'grass_light')
-            a.dot(x - 1, y - 3, 'grass_mid')
-            a.dot(x + 1, y - 1, 'grass_tip')
+        tuft_counts = [11, 18, 7, 14]
+        for _ in range(tuft_counts[variant]):
+            x, y = rng.randrange(2, 29), rng.randrange(6, 31)
+            height = rng.randrange(3, 7) if variant in (1, 3) else rng.randrange(2, 5)
+            a.line(x, y, x, y - height, 'grass_light')
+            a.line(x - 1, y, x - 2, y - height + 1, 'grass_mid')
+            a.line(x + 1, y, x + 2, y - height + 2, 'grass_tip')
+            a.dot(x, y - height, 'moss' if variant == 3 else 'grass_tip')
+        if variant == 2:
+            for x, y in [(10, 19), (17, 22), (20, 17)]:
+                a.line(x, y, x + 2, y, 'moss')
         a.save(f'grass_{variant}')
 
         a = Art('stone_dark')
-        # Three courses of irregular hand-cut blocks. Never rotated in the scene.
-        for row, y in enumerate([1, 10, 20]):
-            cuts = [-8 + ((row + variant) % 2) * 8, 8 + ((row + variant) % 2) * 8, 24 + ((row + variant) % 2) * 8, 40]
-            for left, right in zip(cuts, cuts[1:]):
-                shade = rng.choice(['stone', 'stone_mid'])
-                a.rect(left + 1, y, right - left - 2, 8, shade)
-                a.line(left + 2, y, right - 2, y, 'stone_light')
-                a.line(left + 1, y + 1, left + 1, y + 6, 'stone_light')
-                a.line(left + 2, y + 7, right - 2, y + 7, 'stone_dark')
-        for _ in range(12):
-            x, y = rng.randrange(32), rng.randrange(29)
-            a.dot(x, y, rng.choice(['stone', 'stone_mid']))
+        for row, (top, bottom, cuts) in enumerate(stone_courses[variant]):
+            for block, (left, right) in enumerate(zip(cuts, cuts[1:])):
+                shade = ['stone', 'stone_mid', 'stone_light'][(variant + row + block) % 3]
+                a.rect(left + 1, top + 1, right - left - 2, bottom - top - 2, shade)
+                a.line(left + 2, top + 1, right - 3, top + 1, 'stone_top')
+                a.line(left + 1, top + 2, left + 1, bottom - 3, 'stone_light')
+                a.line(left + 2, bottom - 2, right - 2, bottom - 2, 'stone')
+                # Individual chips and pits preserve the larger block shapes.
+                for _ in range(3):
+                    x = rng.randrange(left + 2, right - 1)
+                    y = rng.randrange(top + 2, bottom - 1)
+                    a.dot(x, y, 'stone_dark' if variant == 2 else 'stone_mid')
+        if variant == 1:
+            a.line(11, 3, 14, 7, 'stone_dark')
+            a.line(14, 7, 12, 12, 'stone_dark')
+            a.dot(15, 7, 'stone_top')
+        elif variant == 2:
+            a.rect(20, 11, 3, 2, 'stone_dark')
+            a.line(3, 22, 6, 25, 'stone_dark')
+        elif variant == 3:
+            for x, y in [(3, 9), (5, 10), (7, 10), (26, 21), (28, 20)]:
+                a.rect(x, y, 2, 1, 'grass_tip')
         a.rect(0, 30, 32, 2, 'ink')
         a.line(1, 29, 30, 29, 'stone')
         a.save(f'wall_{variant}')
