@@ -1,0 +1,720 @@
+// !$*UTF8*$!
+{
+	"archiveVersion" = 1;
+	"classes" = {
+	};
+	"objectVersion" = 56;
+	"objects" = {
+		34861D7FA116E98C139AC28D = {
+			"isa" = PBXFileReference;
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Sources/FortressCore/Actor.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		A75D18920D72265D232C0E31 = {
+			"isa" = PBXFileReference;
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Sources/FortressCore/Grid.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		A86DE9F836D0A6D2DFDE9F0B = {
+			"isa" = PBXFileReference;
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Sources/FortressCore/Pathfinder.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		BAEA9E31871A92CFDAA2BD24 = {
+			"isa" = PBXFileReference;
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Sources/FortressCore/Simulation.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		E1687523ED70A15290B6F749 = {
+			"isa" = PBXFileReference;
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Sources/FortressCore/World.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		1EF68D214B8500C87BE2D7AF = {
+			"isa" = PBXFileReference;
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "DarkFortress/App/AppDelegate.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		ACF2F7FA92B96816CCF236A9 = {
+			"isa" = PBXFileReference;
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "DarkFortress/App/GameViewController.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		AD3B8A05450E5075E5FA8044 = {
+			"isa" = PBXFileReference;
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "DarkFortress/Presentation/ActorNode.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		B7FA2115A5975F32C0A8045C = {
+			"isa" = PBXFileReference;
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "DarkFortress/Presentation/GameHUD.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		761EDECE1795F71D19BBC583 = {
+			"isa" = PBXFileReference;
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "DarkFortress/Presentation/GamePalette.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		30779E7783F78B696E26ADE8 = {
+			"isa" = PBXFileReference;
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "DarkFortress/Presentation/GameScene.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		5E95250C6ED35277EBB24B89 = {
+			"isa" = PBXFileReference;
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "DarkFortress/Presentation/PathOverlay.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		B1B6D9C042F5696AAE966878 = {
+			"isa" = PBXFileReference;
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "DarkFortress/Presentation/PixelTextures.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		05E40DA17CFE3C880AB47A56 = {
+			"isa" = PBXFileReference;
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Tests/FortressCoreTests/FortressCoreTests.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		8A241E2E48637C3217539818 = {
+			"isa" = PBXFileReference;
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "DarkFortressUITests/GameUITests.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		098586FBB1710A2E1695B801 = {
+			"isa" = PBXFileReference;
+			"lastKnownFileType" = "folder.skatlas";
+			"path" = "DarkFortress/Resources/Pixel.atlas";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		C210A3C4B19C7355107B648B = {
+			"isa" = PBXFileReference;
+			"lastKnownFileType" = "folder.assetcatalog";
+			"path" = "DarkFortress/Resources/Assets.xcassets";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		078D6653CBF67994998D2E6B = {
+			"isa" = PBXFileReference;
+			"lastKnownFileType" = "text.json";
+			"path" = "DarkFortress/Resources/palette.json";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		877A6BA951A2EA0025A2ABE8 = {
+			"isa" = XCBuildConfiguration;
+			"buildSettings" = {
+				"SDKROOT" = "iphoneos";
+				"IPHONEOS_DEPLOYMENT_TARGET" = "16.0";
+				"SWIFT_VERSION" = "5.0";
+				"CLANG_ENABLE_MODULES" = "YES";
+				"CLANG_ENABLE_OBJC_ARC" = "YES";
+				"CLANG_WARN_DOCUMENTATION_COMMENTS" = "YES";
+				"GCC_WARN_UNDECLARED_SELECTOR" = "YES";
+				"GCC_WARN_UNUSED_FUNCTION" = "YES";
+				"GCC_WARN_UNUSED_VARIABLE" = "YES";
+				"ENABLE_STRICT_OBJC_MSGSEND" = "YES";
+				"ENABLE_USER_SCRIPT_SANDBOXING" = "YES";
+				"TARGETED_DEVICE_FAMILY" = "1";
+				"SUPPORTED_PLATFORMS" = "iphoneos iphonesimulator";
+				"SUPPORTS_MACCATALYST" = "NO";
+				"SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD" = "NO";
+				"SWIFT_OPTIMIZATION_LEVEL" = "-Onone";
+				"DEBUG_INFORMATION_FORMAT" = "dwarf";
+				"ENABLE_TESTABILITY" = "YES";
+				"SWIFT_ACTIVE_COMPILATION_CONDITIONS" = "DEBUG $(inherited)";
+				"ONLY_ACTIVE_ARCH" = "YES";
+			};
+			"name" = "Debug";
+		};
+		959134B361DD7E21ADEA3164 = {
+			"isa" = XCBuildConfiguration;
+			"buildSettings" = {
+				"SDKROOT" = "iphoneos";
+				"IPHONEOS_DEPLOYMENT_TARGET" = "16.0";
+				"SWIFT_VERSION" = "5.0";
+				"CLANG_ENABLE_MODULES" = "YES";
+				"CLANG_ENABLE_OBJC_ARC" = "YES";
+				"CLANG_WARN_DOCUMENTATION_COMMENTS" = "YES";
+				"GCC_WARN_UNDECLARED_SELECTOR" = "YES";
+				"GCC_WARN_UNUSED_FUNCTION" = "YES";
+				"GCC_WARN_UNUSED_VARIABLE" = "YES";
+				"ENABLE_STRICT_OBJC_MSGSEND" = "YES";
+				"ENABLE_USER_SCRIPT_SANDBOXING" = "YES";
+				"TARGETED_DEVICE_FAMILY" = "1";
+				"SUPPORTED_PLATFORMS" = "iphoneos iphonesimulator";
+				"SUPPORTS_MACCATALYST" = "NO";
+				"SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD" = "NO";
+				"SWIFT_OPTIMIZATION_LEVEL" = "-O";
+				"DEBUG_INFORMATION_FORMAT" = "dwarf-with-dsym";
+				"ENABLE_TESTABILITY" = "NO";
+				"SWIFT_ACTIVE_COMPILATION_CONDITIONS" = "$(inherited)";
+				"ONLY_ACTIVE_ARCH" = "NO";
+			};
+			"name" = "Release";
+		};
+		247BF104A9AD002C539DA531 = {
+			"isa" = XCConfigurationList;
+			"buildConfigurations" = (
+				877A6BA951A2EA0025A2ABE8,
+				959134B361DD7E21ADEA3164,
+			);
+			"defaultConfigurationIsVisible" = 0;
+			"defaultConfigurationName" = "Release";
+		};
+		6DA04CA0BF826FDBC9DBF9DF = {
+			"isa" = PBXFileReference;
+			"explicitFileType" = "wrapper.application";
+			"includeInIndex" = 0;
+			"path" = "DarkFortress.app";
+			"sourceTree" = "BUILT_PRODUCTS_DIR";
+		};
+		18963518177793C17A34C1B0 = {
+			"isa" = PBXBuildFile;
+			"fileRef" = 34861D7FA116E98C139AC28D;
+		};
+		17401025B28BE5A1D4E84EA2 = {
+			"isa" = PBXBuildFile;
+			"fileRef" = A75D18920D72265D232C0E31;
+		};
+		1AF350639CD95C329D3B9D40 = {
+			"isa" = PBXBuildFile;
+			"fileRef" = A86DE9F836D0A6D2DFDE9F0B;
+		};
+		5AC7E8002D39EBA7325ECC7C = {
+			"isa" = PBXBuildFile;
+			"fileRef" = BAEA9E31871A92CFDAA2BD24;
+		};
+		581CD90CF956C3B26E89491E = {
+			"isa" = PBXBuildFile;
+			"fileRef" = E1687523ED70A15290B6F749;
+		};
+		3CDD74DF3743DFA6D6675814 = {
+			"isa" = PBXBuildFile;
+			"fileRef" = 1EF68D214B8500C87BE2D7AF;
+		};
+		B5DA482770872ABC420E7D0C = {
+			"isa" = PBXBuildFile;
+			"fileRef" = ACF2F7FA92B96816CCF236A9;
+		};
+		9EB57093A9876F66307159B2 = {
+			"isa" = PBXBuildFile;
+			"fileRef" = AD3B8A05450E5075E5FA8044;
+		};
+		3895764EEEBE64969562CC3A = {
+			"isa" = PBXBuildFile;
+			"fileRef" = B7FA2115A5975F32C0A8045C;
+		};
+		5AFE16D38A5FE0BA195BA2AF = {
+			"isa" = PBXBuildFile;
+			"fileRef" = 761EDECE1795F71D19BBC583;
+		};
+		F4AFF4292633A5AA0A2A4FEF = {
+			"isa" = PBXBuildFile;
+			"fileRef" = 30779E7783F78B696E26ADE8;
+		};
+		FE443AED3989FA2909108FB9 = {
+			"isa" = PBXBuildFile;
+			"fileRef" = 5E95250C6ED35277EBB24B89;
+		};
+		14697F912CA11FAE7C08A608 = {
+			"isa" = PBXBuildFile;
+			"fileRef" = B1B6D9C042F5696AAE966878;
+		};
+		33309D8394C248A3440EEBC3 = {
+			"isa" = PBXBuildFile;
+			"fileRef" = 098586FBB1710A2E1695B801;
+		};
+		72A9C51DF891594F35EB77E2 = {
+			"isa" = PBXBuildFile;
+			"fileRef" = C210A3C4B19C7355107B648B;
+		};
+		52E9C6CE36C00F667F071A22 = {
+			"isa" = PBXBuildFile;
+			"fileRef" = 078D6653CBF67994998D2E6B;
+		};
+		64DA5AEBB5A8A6344F5B3ADB = {
+			"isa" = PBXSourcesBuildPhase;
+			"buildActionMask" = 2147483647;
+			"files" = (
+				18963518177793C17A34C1B0,
+				17401025B28BE5A1D4E84EA2,
+				1AF350639CD95C329D3B9D40,
+				5AC7E8002D39EBA7325ECC7C,
+				581CD90CF956C3B26E89491E,
+				3CDD74DF3743DFA6D6675814,
+				B5DA482770872ABC420E7D0C,
+				9EB57093A9876F66307159B2,
+				3895764EEEBE64969562CC3A,
+				5AFE16D38A5FE0BA195BA2AF,
+				F4AFF4292633A5AA0A2A4FEF,
+				FE443AED3989FA2909108FB9,
+				14697F912CA11FAE7C08A608,
+			);
+			"runOnlyForDeploymentPostprocessing" = 0;
+		};
+		741DEC396BB5443C1FBB9D46 = {
+			"isa" = PBXFrameworksBuildPhase;
+			"buildActionMask" = 2147483647;
+			"files" = (
+			);
+			"runOnlyForDeploymentPostprocessing" = 0;
+		};
+		E53D28A4611B3F49B24A45E2 = {
+			"isa" = PBXResourcesBuildPhase;
+			"buildActionMask" = 2147483647;
+			"files" = (
+				33309D8394C248A3440EEBC3,
+				72A9C51DF891594F35EB77E2,
+				52E9C6CE36C00F667F071A22,
+			);
+			"runOnlyForDeploymentPostprocessing" = 0;
+		};
+		53418BF13CA1A7036E58AE95 = {
+			"isa" = XCBuildConfiguration;
+			"buildSettings" = {
+				"PRODUCT_NAME" = "$(TARGET_NAME)";
+				"PRODUCT_BUNDLE_IDENTIFIER" = "com.aaronshaver.darkfortress";
+				"CODE_SIGN_STYLE" = "Automatic";
+				"LD_RUNPATH_SEARCH_PATHS" = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				"INFOPLIST_FILE" = "DarkFortress/Info.plist";
+				"ASSETCATALOG_COMPILER_APPICON_NAME" = "AppIcon";
+				"ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME" = "";
+				"GENERATE_INFOPLIST_FILE" = "NO";
+			};
+			"name" = "Debug";
+		};
+		3432A7BE1CB338CDB992C5CA = {
+			"isa" = XCBuildConfiguration;
+			"buildSettings" = {
+				"PRODUCT_NAME" = "$(TARGET_NAME)";
+				"PRODUCT_BUNDLE_IDENTIFIER" = "com.aaronshaver.darkfortress";
+				"CODE_SIGN_STYLE" = "Automatic";
+				"LD_RUNPATH_SEARCH_PATHS" = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				"INFOPLIST_FILE" = "DarkFortress/Info.plist";
+				"ASSETCATALOG_COMPILER_APPICON_NAME" = "AppIcon";
+				"ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME" = "";
+				"GENERATE_INFOPLIST_FILE" = "NO";
+			};
+			"name" = "Release";
+		};
+		352286E120CB3317D51F12DE = {
+			"isa" = XCConfigurationList;
+			"buildConfigurations" = (
+				53418BF13CA1A7036E58AE95,
+				3432A7BE1CB338CDB992C5CA,
+			);
+			"defaultConfigurationIsVisible" = 0;
+			"defaultConfigurationName" = "Release";
+		};
+		3977F81C256D1EC081C03818 = {
+			"isa" = PBXNativeTarget;
+			"buildConfigurationList" = 352286E120CB3317D51F12DE;
+			"buildPhases" = (
+				64DA5AEBB5A8A6344F5B3ADB,
+				741DEC396BB5443C1FBB9D46,
+				E53D28A4611B3F49B24A45E2,
+			);
+			"buildRules" = (
+			);
+			"dependencies" = (
+			);
+			"name" = "DarkFortress";
+			"productName" = "DarkFortress";
+			"productReference" = 6DA04CA0BF826FDBC9DBF9DF;
+			"productType" = "com.apple.product-type.application";
+		};
+		71D7F1135FB3461AA4F73861 = {
+			"isa" = PBXFileReference;
+			"explicitFileType" = "wrapper.cfbundle";
+			"includeInIndex" = 0;
+			"path" = "FortressCoreTests.xctest";
+			"sourceTree" = "BUILT_PRODUCTS_DIR";
+		};
+		03428C5C6C2D5E3778D5332E = {
+			"isa" = PBXBuildFile;
+			"fileRef" = 34861D7FA116E98C139AC28D;
+		};
+		8EFD792FF17438652FC9A100 = {
+			"isa" = PBXBuildFile;
+			"fileRef" = A75D18920D72265D232C0E31;
+		};
+		BBC8B4AE80BCA8D5AB1DB867 = {
+			"isa" = PBXBuildFile;
+			"fileRef" = A86DE9F836D0A6D2DFDE9F0B;
+		};
+		9B3E77E66D787077638882DF = {
+			"isa" = PBXBuildFile;
+			"fileRef" = BAEA9E31871A92CFDAA2BD24;
+		};
+		DB7EC2F1FE97BC8B0E93B991 = {
+			"isa" = PBXBuildFile;
+			"fileRef" = E1687523ED70A15290B6F749;
+		};
+		74873A097D968E09C1E7B1B4 = {
+			"isa" = PBXBuildFile;
+			"fileRef" = 05E40DA17CFE3C880AB47A56;
+		};
+		654420764BA8A57BC3CB1B12 = {
+			"isa" = PBXSourcesBuildPhase;
+			"buildActionMask" = 2147483647;
+			"files" = (
+				03428C5C6C2D5E3778D5332E,
+				8EFD792FF17438652FC9A100,
+				BBC8B4AE80BCA8D5AB1DB867,
+				9B3E77E66D787077638882DF,
+				DB7EC2F1FE97BC8B0E93B991,
+				74873A097D968E09C1E7B1B4,
+			);
+			"runOnlyForDeploymentPostprocessing" = 0;
+		};
+		C692241D2C891FC9D04FD22A = {
+			"isa" = PBXFrameworksBuildPhase;
+			"buildActionMask" = 2147483647;
+			"files" = (
+			);
+			"runOnlyForDeploymentPostprocessing" = 0;
+		};
+		3EF04CB9C7EC3C1C29B413E8 = {
+			"isa" = PBXResourcesBuildPhase;
+			"buildActionMask" = 2147483647;
+			"files" = (
+			);
+			"runOnlyForDeploymentPostprocessing" = 0;
+		};
+		0EE150A877EDB6F14DFD2720 = {
+			"isa" = PBXContainerItemProxy;
+			"containerPortal" = 98F54143AB4E86B28C3AFEE0;
+			"proxyType" = 1;
+			"remoteGlobalIDString" = 3977F81C256D1EC081C03818;
+			"remoteInfo" = "DarkFortress";
+		};
+		E2CA9B72DF4F3820AE5D9E09 = {
+			"isa" = PBXTargetDependency;
+			"target" = 3977F81C256D1EC081C03818;
+			"targetProxy" = 0EE150A877EDB6F14DFD2720;
+		};
+		C7965E2B3890735C36715904 = {
+			"isa" = XCBuildConfiguration;
+			"buildSettings" = {
+				"PRODUCT_NAME" = "$(TARGET_NAME)";
+				"PRODUCT_BUNDLE_IDENTIFIER" = "com.aaronshaver.darkfortress.FortressCoreTests";
+				"CODE_SIGN_STYLE" = "Automatic";
+				"LD_RUNPATH_SEARCH_PATHS" = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				"GENERATE_INFOPLIST_FILE" = "YES";
+				"TEST_HOST" = "$(BUILT_PRODUCTS_DIR)/DarkFortress.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/DarkFortress";
+				"BUNDLE_LOADER" = "$(TEST_HOST)";
+			};
+			"name" = "Debug";
+		};
+		8DFB6A9C32D956E91954EA3D = {
+			"isa" = XCBuildConfiguration;
+			"buildSettings" = {
+				"PRODUCT_NAME" = "$(TARGET_NAME)";
+				"PRODUCT_BUNDLE_IDENTIFIER" = "com.aaronshaver.darkfortress.FortressCoreTests";
+				"CODE_SIGN_STYLE" = "Automatic";
+				"LD_RUNPATH_SEARCH_PATHS" = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				"GENERATE_INFOPLIST_FILE" = "YES";
+				"TEST_HOST" = "$(BUILT_PRODUCTS_DIR)/DarkFortress.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/DarkFortress";
+				"BUNDLE_LOADER" = "$(TEST_HOST)";
+			};
+			"name" = "Release";
+		};
+		3245E772624D4EB8A2B66A0F = {
+			"isa" = XCConfigurationList;
+			"buildConfigurations" = (
+				C7965E2B3890735C36715904,
+				8DFB6A9C32D956E91954EA3D,
+			);
+			"defaultConfigurationIsVisible" = 0;
+			"defaultConfigurationName" = "Release";
+		};
+		019470E63257EA7C016CE427 = {
+			"isa" = PBXNativeTarget;
+			"buildConfigurationList" = 3245E772624D4EB8A2B66A0F;
+			"buildPhases" = (
+				654420764BA8A57BC3CB1B12,
+				C692241D2C891FC9D04FD22A,
+				3EF04CB9C7EC3C1C29B413E8,
+			);
+			"buildRules" = (
+			);
+			"dependencies" = (
+				E2CA9B72DF4F3820AE5D9E09,
+			);
+			"name" = "FortressCoreTests";
+			"productName" = "FortressCoreTests";
+			"productReference" = 71D7F1135FB3461AA4F73861;
+			"productType" = "com.apple.product-type.bundle.unit-test";
+		};
+		B7E3D714D8AA04A3566C586E = {
+			"isa" = PBXFileReference;
+			"explicitFileType" = "wrapper.cfbundle";
+			"includeInIndex" = 0;
+			"path" = "DarkFortressUITests.xctest";
+			"sourceTree" = "BUILT_PRODUCTS_DIR";
+		};
+		6E459FE6151E55A65A039575 = {
+			"isa" = PBXBuildFile;
+			"fileRef" = 8A241E2E48637C3217539818;
+		};
+		DE188D66EA331D0E9865C2CF = {
+			"isa" = PBXSourcesBuildPhase;
+			"buildActionMask" = 2147483647;
+			"files" = (
+				6E459FE6151E55A65A039575,
+			);
+			"runOnlyForDeploymentPostprocessing" = 0;
+		};
+		59CC33CE7F4C075AF7E0F825 = {
+			"isa" = PBXFrameworksBuildPhase;
+			"buildActionMask" = 2147483647;
+			"files" = (
+			);
+			"runOnlyForDeploymentPostprocessing" = 0;
+		};
+		C2E401D773BC622C25EAC579 = {
+			"isa" = PBXResourcesBuildPhase;
+			"buildActionMask" = 2147483647;
+			"files" = (
+			);
+			"runOnlyForDeploymentPostprocessing" = 0;
+		};
+		5AC55D543D5279ED9F02B2E1 = {
+			"isa" = PBXContainerItemProxy;
+			"containerPortal" = 98F54143AB4E86B28C3AFEE0;
+			"proxyType" = 1;
+			"remoteGlobalIDString" = 3977F81C256D1EC081C03818;
+			"remoteInfo" = "DarkFortress";
+		};
+		7E6204DD7A7AF6514FCDB9A4 = {
+			"isa" = PBXTargetDependency;
+			"target" = 3977F81C256D1EC081C03818;
+			"targetProxy" = 5AC55D543D5279ED9F02B2E1;
+		};
+		716AE04E43117C953E8F643E = {
+			"isa" = XCBuildConfiguration;
+			"buildSettings" = {
+				"PRODUCT_NAME" = "$(TARGET_NAME)";
+				"PRODUCT_BUNDLE_IDENTIFIER" = "com.aaronshaver.darkfortress.DarkFortressUITests";
+				"CODE_SIGN_STYLE" = "Automatic";
+				"LD_RUNPATH_SEARCH_PATHS" = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				"GENERATE_INFOPLIST_FILE" = "YES";
+				"TEST_TARGET_NAME" = "DarkFortress";
+			};
+			"name" = "Debug";
+		};
+		1D0ACC58A3755B83C91D0507 = {
+			"isa" = XCBuildConfiguration;
+			"buildSettings" = {
+				"PRODUCT_NAME" = "$(TARGET_NAME)";
+				"PRODUCT_BUNDLE_IDENTIFIER" = "com.aaronshaver.darkfortress.DarkFortressUITests";
+				"CODE_SIGN_STYLE" = "Automatic";
+				"LD_RUNPATH_SEARCH_PATHS" = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				"GENERATE_INFOPLIST_FILE" = "YES";
+				"TEST_TARGET_NAME" = "DarkFortress";
+			};
+			"name" = "Release";
+		};
+		C7BCDD3982CA64FC951167C4 = {
+			"isa" = XCConfigurationList;
+			"buildConfigurations" = (
+				716AE04E43117C953E8F643E,
+				1D0ACC58A3755B83C91D0507,
+			);
+			"defaultConfigurationIsVisible" = 0;
+			"defaultConfigurationName" = "Release";
+		};
+		408ACDBB781C0B39216BFE7F = {
+			"isa" = PBXNativeTarget;
+			"buildConfigurationList" = C7BCDD3982CA64FC951167C4;
+			"buildPhases" = (
+				DE188D66EA331D0E9865C2CF,
+				59CC33CE7F4C075AF7E0F825,
+				C2E401D773BC622C25EAC579,
+			);
+			"buildRules" = (
+			);
+			"dependencies" = (
+				7E6204DD7A7AF6514FCDB9A4,
+			);
+			"name" = "DarkFortressUITests";
+			"productName" = "DarkFortressUITests";
+			"productReference" = B7E3D714D8AA04A3566C586E;
+			"productType" = "com.apple.product-type.bundle.ui-testing";
+		};
+		1C48CE29E4E135EE62951B22 = {
+			"isa" = PBXGroup;
+			"children" = (
+				1EF68D214B8500C87BE2D7AF,
+				ACF2F7FA92B96816CCF236A9,
+			);
+			"name" = "App";
+			"sourceTree" = "<group>";
+		};
+		BEE5558D0BB552A58936C015 = {
+			"isa" = PBXGroup;
+			"children" = (
+				AD3B8A05450E5075E5FA8044,
+				B7FA2115A5975F32C0A8045C,
+				761EDECE1795F71D19BBC583,
+				30779E7783F78B696E26ADE8,
+				5E95250C6ED35277EBB24B89,
+				B1B6D9C042F5696AAE966878,
+			);
+			"name" = "Presentation";
+			"sourceTree" = "<group>";
+		};
+		A6D28BB20DF74CA8575431D1 = {
+			"isa" = PBXGroup;
+			"children" = (
+				34861D7FA116E98C139AC28D,
+				A75D18920D72265D232C0E31,
+				A86DE9F836D0A6D2DFDE9F0B,
+				BAEA9E31871A92CFDAA2BD24,
+				E1687523ED70A15290B6F749,
+			);
+			"name" = "Fortress Core";
+			"sourceTree" = "<group>";
+		};
+		BEFCA83058A383FFE82EF1DC = {
+			"isa" = PBXFileReference;
+			"lastKnownFileType" = "text.plist.xml";
+			"path" = "DarkFortress/Info.plist";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		A024F06580C79B7582C3806A = {
+			"isa" = PBXGroup;
+			"children" = (
+				098586FBB1710A2E1695B801,
+				C210A3C4B19C7355107B648B,
+				078D6653CBF67994998D2E6B,
+				BEFCA83058A383FFE82EF1DC,
+			);
+			"name" = "Resources";
+			"sourceTree" = "<group>";
+		};
+		156052F04525D0F710673CF0 = {
+			"isa" = PBXGroup;
+			"children" = (
+				05E40DA17CFE3C880AB47A56,
+				8A241E2E48637C3217539818,
+			);
+			"name" = "Tests";
+			"sourceTree" = "<group>";
+		};
+		B483166B8F69B64C8CA2EEB8 = {
+			"isa" = PBXFileReference;
+			"lastKnownFileType" = "net.daringfireball.markdown";
+			"path" = "project_principles.md";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		E4C41C548EF34772EFF6A9F7 = {
+			"isa" = PBXFileReference;
+			"lastKnownFileType" = "net.daringfireball.markdown";
+			"path" = "game_principles.md";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		0AD8FCFBC668D12D6FC0A74B = {
+			"isa" = PBXGroup;
+			"children" = (
+				B483166B8F69B64C8CA2EEB8,
+				E4C41C548EF34772EFF6A9F7,
+			);
+			"name" = "Principles";
+			"sourceTree" = "<group>";
+		};
+		5151B46607EBC8890D8DFCC2 = {
+			"isa" = PBXGroup;
+			"children" = (
+				6DA04CA0BF826FDBC9DBF9DF,
+				71D7F1135FB3461AA4F73861,
+				B7E3D714D8AA04A3566C586E,
+			);
+			"name" = "Products";
+			"sourceTree" = "<group>";
+		};
+		44DFDB44171A57B2ED6C62D8 = {
+			"isa" = PBXGroup;
+			"children" = (
+				1C48CE29E4E135EE62951B22,
+				BEE5558D0BB552A58936C015,
+				A6D28BB20DF74CA8575431D1,
+				A024F06580C79B7582C3806A,
+				156052F04525D0F710673CF0,
+				0AD8FCFBC668D12D6FC0A74B,
+				5151B46607EBC8890D8DFCC2,
+			);
+			"name" = "Dark Fortress";
+			"sourceTree" = "<group>";
+		};
+		98F54143AB4E86B28C3AFEE0 = {
+			"isa" = PBXProject;
+			"attributes" = {
+				"BuildIndependentTargetsInParallel" = "YES";
+				"LastUpgradeCheck" = "2600";
+				"TargetAttributes" = {
+					3977F81C256D1EC081C03818 = {
+						"CreatedOnToolsVersion" = "26.0";
+					};
+					019470E63257EA7C016CE427 = {
+						"CreatedOnToolsVersion" = "26.0";
+						"TestTargetID" = 3977F81C256D1EC081C03818;
+					};
+					408ACDBB781C0B39216BFE7F = {
+						"CreatedOnToolsVersion" = "26.0";
+						"TestTargetID" = 3977F81C256D1EC081C03818;
+					};
+				};
+			};
+			"buildConfigurationList" = 247BF104A9AD002C539DA531;
+			"compatibilityVersion" = "Xcode 14.0";
+			"developmentRegion" = "en";
+			"hasScannedForEncodings" = 0;
+			"knownRegions" = (
+				"en",
+				"Base",
+			);
+			"mainGroup" = 44DFDB44171A57B2ED6C62D8;
+			"productRefGroup" = 5151B46607EBC8890D8DFCC2;
+			"projectDirPath" = "";
+			"projectRoot" = "";
+			"targets" = (
+				3977F81C256D1EC081C03818,
+				019470E63257EA7C016CE427,
+				408ACDBB781C0B39216BFE7F,
+			);
+		};
+	};
+	"rootObject" = 98F54143AB4E86B28C3AFEE0;
+}
