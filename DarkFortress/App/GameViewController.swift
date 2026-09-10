@@ -44,8 +44,6 @@ final class GameViewController: UIViewController {
         toolbar.onNewGame = { [weak self] in self?.startNewGame() }
         toolbar.onToggleZoom = { [weak self] in self?.toggleZoom() }
         toolbar.onTogglePause = { [weak self] in self?.togglePause() }
-        NotificationCenter.default.addObserver(self, selector: #selector(pauseForInterruption),
-                                               name: UIApplication.willResignActiveNotification, object: nil)
         textures.preload { [weak self] in
             DispatchQueue.main.async { self?.startIfReady() }
         }
@@ -119,7 +117,7 @@ final class GameViewController: UIViewController {
         updatePausePresentation()
     }
 
-    @objc private func pauseForInterruption() {
+    func pauseForInterruption() {
         guard let scene = gameScene, !scene.simulation.isGameOver else { return }
         scene.setPaused(true)
         updatePausePresentation()

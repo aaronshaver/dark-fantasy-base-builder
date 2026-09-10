@@ -53,6 +53,12 @@
 			"path" = "DarkFortress/App/GameViewController.swift";
 			"sourceTree" = "SOURCE_ROOT";
 		};
+		21EE3DDBBA1117EBE2AEBBE2 = {
+			"isa" = PBXFileReference;
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "DarkFortress/App/SceneDelegate.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
 		AD3B8A05450E5075E5FA8044 = {
 			"isa" = PBXFileReference;
 			"lastKnownFileType" = "sourcecode.swift";
@@ -225,6 +231,10 @@
 			"isa" = PBXBuildFile;
 			"fileRef" = ACF2F7FA92B96816CCF236A9;
 		};
+		9A284DFEDA597BFBC279B212 = {
+			"isa" = PBXBuildFile;
+			"fileRef" = 21EE3DDBBA1117EBE2AEBBE2;
+		};
 		9EB57093A9876F66307159B2 = {
 			"isa" = PBXBuildFile;
 			"fileRef" = AD3B8A05450E5075E5FA8044;
@@ -277,6 +287,7 @@
 				3CDD74DF3743DFA6D6675814,
 				8C783A2CCF99159C3B493717,
 				B5DA482770872ABC420E7D0C,
+				9A284DFEDA597BFBC279B212,
 				9EB57093A9876F66307159B2,
 				3895764EEEBE64969562CC3A,
 				5AFE16D38A5FE0BA195BA2AF,
@@ -601,6 +612,7 @@
 				1EF68D214B8500C87BE2D7AF,
 				BBEAB48AB771FCE3F86EC025,
 				ACF2F7FA92B96816CCF236A9,
+				21EE3DDBBA1117EBE2AEBBE2,
 			);
 			"name" = "App";
 			"sourceTree" = "<group>";
