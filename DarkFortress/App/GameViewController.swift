@@ -38,6 +38,9 @@ final class GameViewController: UIViewController {
             gameView.leadingAnchor.constraint(equalTo: view.leadingAnchor), gameView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
         ])
         configureOverlays()
+        toolbar.onDebug = { [weak self] in
+            self?.present(UINavigationController(rootViewController: DebugViewController()), animated: true)
+        }
         toolbar.onNewGame = { [weak self] in self?.startNewGame() }
         toolbar.onToggleZoom = { [weak self] in self?.toggleZoom() }
         toolbar.onTogglePause = { [weak self] in self?.togglePause() }

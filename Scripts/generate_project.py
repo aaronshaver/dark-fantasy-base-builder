@@ -47,7 +47,8 @@ unit = [file('Tests/FortressCoreTests/FortressCoreTests.swift')]
 ui = [file('DarkFortressUITests/GameUITests.swift')]
 resources = [file('DarkFortress/Resources/Pixel.atlas', 'folder.skatlas'),
              file('DarkFortress/Resources/Assets.xcassets', 'folder.assetcatalog'),
-             file('DarkFortress/Resources/palette.json', 'text.json')]
+             file('DarkFortress/Resources/palette.json', 'text.json'),
+             file('DarkFortress/Resources/WriteProbe', 'folder')]
 
 
 def group(name, children):

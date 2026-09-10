@@ -41,6 +41,12 @@
 			"path" = "DarkFortress/App/AppDelegate.swift";
 			"sourceTree" = "SOURCE_ROOT";
 		};
+		BBEAB48AB771FCE3F86EC025 = {
+			"isa" = PBXFileReference;
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "DarkFortress/App/DebugViewController.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
 		ACF2F7FA92B96816CCF236A9 = {
 			"isa" = PBXFileReference;
 			"lastKnownFileType" = "sourcecode.swift";
@@ -111,6 +117,12 @@
 			"isa" = PBXFileReference;
 			"lastKnownFileType" = "text.json";
 			"path" = "DarkFortress/Resources/palette.json";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		13372F58233C7F7729EAEC88 = {
+			"isa" = PBXFileReference;
+			"lastKnownFileType" = "folder";
+			"path" = "DarkFortress/Resources/WriteProbe";
 			"sourceTree" = "SOURCE_ROOT";
 		};
 		877A6BA951A2EA0025A2ABE8 = {
@@ -205,6 +217,10 @@
 			"isa" = PBXBuildFile;
 			"fileRef" = 1EF68D214B8500C87BE2D7AF;
 		};
+		8C783A2CCF99159C3B493717 = {
+			"isa" = PBXBuildFile;
+			"fileRef" = BBEAB48AB771FCE3F86EC025;
+		};
 		B5DA482770872ABC420E7D0C = {
 			"isa" = PBXBuildFile;
 			"fileRef" = ACF2F7FA92B96816CCF236A9;
@@ -245,6 +261,10 @@
 			"isa" = PBXBuildFile;
 			"fileRef" = 078D6653CBF67994998D2E6B;
 		};
+		F0C0F48B604E6F6EC108F8D3 = {
+			"isa" = PBXBuildFile;
+			"fileRef" = 13372F58233C7F7729EAEC88;
+		};
 		64DA5AEBB5A8A6344F5B3ADB = {
 			"isa" = PBXSourcesBuildPhase;
 			"buildActionMask" = 2147483647;
@@ -255,6 +275,7 @@
 				5AC7E8002D39EBA7325ECC7C,
 				581CD90CF956C3B26E89491E,
 				3CDD74DF3743DFA6D6675814,
+				8C783A2CCF99159C3B493717,
 				B5DA482770872ABC420E7D0C,
 				9EB57093A9876F66307159B2,
 				3895764EEEBE64969562CC3A,
@@ -279,6 +300,7 @@
 				33309D8394C248A3440EEBC3,
 				72A9C51DF891594F35EB77E2,
 				52E9C6CE36C00F667F071A22,
+				F0C0F48B604E6F6EC108F8D3,
 			);
 			"runOnlyForDeploymentPostprocessing" = 0;
 		};
@@ -577,6 +599,7 @@
 			"isa" = PBXGroup;
 			"children" = (
 				1EF68D214B8500C87BE2D7AF,
+				BBEAB48AB771FCE3F86EC025,
 				ACF2F7FA92B96816CCF236A9,
 			);
 			"name" = "App";
@@ -619,6 +642,7 @@
 				098586FBB1710A2E1695B801,
 				C210A3C4B19C7355107B648B,
 				078D6653CBF67994998D2E6B,
+				13372F58233C7F7729EAEC88,
 				BEFCA83058A383FFE82EF1DC,
 			);
 			"name" = "Resources";
