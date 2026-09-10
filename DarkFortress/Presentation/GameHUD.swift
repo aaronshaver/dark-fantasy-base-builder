@@ -37,20 +37,16 @@ final class GameHUD: UIView {
 }
 
 final class GameToolbar: UIView {
-    var onNewGame: (() -> Void)?
     var onToggleZoom: (() -> Void)?
     var onTogglePause: (() -> Void)?
-    var onDev: (() -> Void)?
     private var zoomButton: UIButton!
     private var pauseButton: UIButton!
 
     init() {
         super.init(frame: .zero)
-        let newGame = item(title: "New Game", symbol: "arrow.clockwise", identifier: "newGame", action: #selector(newGameTapped))
         zoomButton = item(title: "Zoom", symbol: "magnifyingglass", identifier: "zoomToggle", action: #selector(zoomTapped))
         pauseButton = item(title: "Pause", symbol: "pause.fill", identifier: "pauseToggle", action: #selector(pauseTapped))
-        let dev = item(title: "Dev", symbol: "ladybug", identifier: "dev", action: #selector(devTapped))
-        let stack = UIStackView(arrangedSubviews: [newGame, zoomButton, pauseButton, dev])
+        let stack = UIStackView(arrangedSubviews: [zoomButton, pauseButton])
         stack.distribution = .fillEqually
         stack.translatesAutoresizingMaskIntoConstraints = false
         addSubview(stack)
@@ -76,11 +72,9 @@ final class GameToolbar: UIView {
         zoomButton.accessibilityValue = "\(percentage)%"
     }
 
-    @objc private func newGameTapped() { onNewGame?() }
     @objc private func zoomTapped() { onToggleZoom?() }
     @objc private func pauseTapped() { onTogglePause?() }
 
-    @objc private func devTapped() { onDev?() }
 
     private func item(title: String, symbol: String, identifier: String, action: Selector? = nil) -> UIButton {
         var configuration = UIButton.Configuration.plain()

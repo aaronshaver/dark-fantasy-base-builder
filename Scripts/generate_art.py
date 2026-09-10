@@ -170,8 +170,19 @@ def ground():
         elif variant == 3:
             for x, y in [(3, 9), (5, 10), (7, 10), (26, 21), (28, 20)]:
                 a.rect(x, y, 2, 1, 'grass_tip')
-        a.rect(0, 30, 32, 2, 'ink')
-        a.line(1, 29, 30, 29, 'stone')
+        # One-pixel outline, with a tiny two-pixel corner radius.
+        # Transparent corner pixels reveal the grass tile below the wall.
+        for x in range(2, 30):
+            a.dot(x, 0, 'stone_dark')
+            a.dot(x, 31, 'stone_dark')
+        for y in range(2, 30):
+            a.dot(0, y, 'stone_dark')
+            a.dot(31, y, 'stone_dark')
+        for cx, cy, dx, dy in [(0, 0, 1, 1), (31, 0, -1, 1), (0, 31, 1, -1), (31, 31, -1, -1)]:
+            a.dot(cx, cy, 'clear')
+            a.dot(cx + dx, cy, 'clear')
+            a.dot(cx, cy + dy, 'clear')
+            a.dot(cx + dx, cy + dy, 'stone_dark')
         a.save(f'wall_{variant}')
 
 

@@ -29,4 +29,10 @@ for path in files:
     assert len(raw) == 33 * 32, path
     assert all(raw[y * 33] == 0 for y in range(32)), path
     assert all(pixel < len(palette) for y in range(32) for pixel in raw[y * 33 + 1:(y + 1) * 33]), path
+    if path.stem.startswith('wall_'):
+        transparent = {(x, y) for y in range(32) for x in range(32) if raw[y * 33 + 1 + x] == 0}
+        corners = set()
+        for cx, cy, dx, dy in [(0, 0, 1, 1), (31, 0, -1, 1), (0, 31, 1, -1), (31, 31, -1, -1)]:
+            corners.update([(cx, cy), (cx + dx, cy), (cx, cy + dy)])
+        assert transparent == corners, f'{path}: only the small rounded corners should reveal grass'
 print(f'PASS: {len(files)} sprites are 32×32 indexed PNGs with one identical {len(palette)}-entry palette and binary transparency.')

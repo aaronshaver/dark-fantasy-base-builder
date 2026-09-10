@@ -49,7 +49,8 @@ final class GameUITests: XCTestCase {
         deathShot.name = "You died"
         deathShot.lifetime = .keepAlways
         add(deathShot)
-        app.buttons["newGame"].tap()
+        app.buttons["dev"].tap()
+        app.cells["newGame"].tap()
         XCTAssertFalse(app.staticTexts["You died"].exists)
         XCTAssertEqual(app.staticTexts["playerHealth"].label, "Health, 30")
         XCTAssertEqual(pause.label, "Pause")

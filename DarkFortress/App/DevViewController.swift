@@ -1,6 +1,8 @@
 import UIKit
 
 final class DevViewController: UITableViewController {
+    var onNewGame: (() -> Void)?
+
     init() { super.init(style: .insetGrouped) }
     required init?(coder: NSCoder) { fatalError("Programmatic dev menu") }
 
@@ -12,19 +14,24 @@ final class DevViewController: UITableViewController {
         })
     }
 
-    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int { 1 }
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int { 2 }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = UITableViewCell(style: .default, reuseIdentifier: nil)
-        cell.textLabel?.text = "Art Variations"
-        cell.accessoryType = .disclosureIndicator
-        cell.accessibilityIdentifier = "artVariations"
+        cell.textLabel?.text = indexPath.row == 0 ? "New Game" : "Art Variations"
+        cell.accessoryType = indexPath.row == 0 ? .none : .disclosureIndicator
+        cell.accessibilityIdentifier = indexPath.row == 0 ? "newGame" : "artVariations"
         return cell
     }
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        navigationController?.pushViewController(ArtVariationsViewController(), animated: true)
+        if indexPath.row == 0 {
+            let start = onNewGame
+            dismiss(animated: true) { start?() }
+        } else {
+            navigationController?.pushViewController(ArtVariationsViewController(), animated: true)
+        }
     }
 }
 

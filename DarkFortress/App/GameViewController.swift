@@ -38,11 +38,7 @@ final class GameViewController: UIViewController {
             gameView.leadingAnchor.constraint(equalTo: view.leadingAnchor), gameView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
         ])
         configureOverlays()
-        toolbar.onDev = { [weak self] in
-            self?.pauseForInterruption()
-            self?.present(UINavigationController(rootViewController: DevViewController()), animated: true)
-        }
-        toolbar.onNewGame = { [weak self] in self?.startNewGame() }
+        configureDevButton()
         toolbar.onToggleZoom = { [weak self] in self?.toggleZoom() }
         toolbar.onTogglePause = { [weak self] in self?.togglePause() }
         textures.preload { [weak self] in
@@ -77,6 +73,31 @@ final class GameViewController: UIViewController {
         NSLayoutConstraint.activate([
             message.centerXAnchor.constraint(equalTo: view.centerXAnchor), message.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             message.widthAnchor.constraint(equalTo: view.widthAnchor, constant: -24)
+        ])
+    }
+
+    private func configureDevButton() {
+        var configuration = UIButton.Configuration.filled()
+        configuration.title = "Dev"
+        configuration.image = UIImage(systemName: "ladybug")
+        configuration.imagePadding = 6
+        configuration.baseBackgroundColor = .secondarySystemBackground
+        configuration.baseForegroundColor = .label
+        let button = UIButton(configuration: configuration, primaryAction: UIAction { [weak self] _ in
+            guard let self else { return }
+            self.pauseForInterruption()
+            let menu = DevViewController()
+            menu.onNewGame = { [weak self] in self?.startNewGame() }
+            self.present(UINavigationController(rootViewController: menu), animated: true)
+        })
+        button.alpha = 0.75
+        button.accessibilityIdentifier = "dev"
+        button.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(button)
+        NSLayoutConstraint.activate([
+            button.topAnchor.constraint(equalTo: gameView.topAnchor, constant: 8),
+            button.trailingAnchor.constraint(equalTo: gameView.trailingAnchor, constant: -8),
+            button.heightAnchor.constraint(greaterThanOrEqualToConstant: 44)
         ])
     }
 

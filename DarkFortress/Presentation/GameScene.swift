@@ -8,6 +8,7 @@ final class GameScene: SKScene {
     private let pathOverlay: PathOverlay
     private var actorNodes: [Int: ActorNode] = [:]
     private var gateNode = SKSpriteNode()
+    private var gateGroundNodes: [SKSpriteNode] = []
     private var lastUpdate: TimeInterval?
     private var cameraReady = false
     private var gateStage = -1
@@ -66,10 +67,17 @@ final class GameScene: SKScene {
     private func buildWorld() {
         let world = simulation.world
         for (tile, ground) in world.ground {
-            let name = ground.terrain == .wood ? "wood" : "grass"
-            _ = sprite("\(name)_\(ground.variant)", at: tile, z: 0)
+            // Every static tile starts with grass. Walk down from the top layer
+            // only while transparency can expose the next layer.
+            var layers = [(name: "grass_\(ground.variant)", z: CGFloat(0))]
+            if ground.terrain == .wood { layers.append(("wood_\(ground.variant)", 1)) }
+            if let variant = world.wallVariants[tile] { layers.append(("wall_\(variant)", 10)) }
+            for layer in layers.reversed() {
+                let node = sprite(layer.name, at: tile, z: layer.z)
+                if tile == world.gateTile { gateGroundNodes.append(node) }
+                if !textures.hasTransparentPixels(layer.name) { break }
+            }
         }
-        for (tile, variant) in world.wallVariants { _ = sprite("wall_\(variant)", at: tile, z: 10) }
         _ = sprite("chair_\(world.chair.color)", at: world.chair.tile, z: 12)
         gateNode = sprite("gate_0", at: world.gateTile, z: 10)
         if world.gateDirection == .east || world.gateDirection == .west { gateNode.zRotation = .pi / 2 }
@@ -111,7 +119,11 @@ final class GameScene: SKScene {
         pathOverlay.synchronize(simulation.player)
         let stage = simulation.world.gate.damageStage
         if stage != gateStage && !simulation.world.gate.isDestroyed {
-            gateNode.texture = textures.texture("gate_\(stage)")
+            let name = "gate_\(stage)"
+            gateNode.texture = textures.texture(name)
+            // Keep the ground available for destruction, but don't render it
+            // while an opaque gate covers it.
+            gateGroundNodes.forEach { $0.isHidden = !textures.hasTransparentPixels(name) }
             gateStage = stage
         }
         let player = simulation.player.position
@@ -138,6 +150,7 @@ final class GameScene: SKScene {
 
     private func destroyGate() {
         gateNode.removeFromParent()
+        gateGroundNodes.forEach { $0.isHidden = false }
         for index in 0..<8 {
             let fragment = sprite("debris_\(index % 4)", at: simulation.world.gateTile, z: 40)
             let angle = CGFloat(index) * .pi / 4
