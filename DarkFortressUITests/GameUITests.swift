@@ -33,7 +33,7 @@ final class GameUITests: XCTestCase {
         pause.tap()
         XCTAssertEqual(pause.label, "Play")
         XCTAssertTrue(app.staticTexts["Paused"].exists)
-        XCTAssertGreaterThan(pause.frame.minX, app.buttons["raise"].frame.minX)
+        XCTAssertGreaterThan(pause.frame.minX, app.buttons["zoomToggle"].frame.minX)
         let frozenHealth = app.staticTexts["playerHealth"].label
         Thread.sleep(forTimeInterval: 2)
         XCTAssertEqual(app.staticTexts["playerHealth"].label, frozenHealth)

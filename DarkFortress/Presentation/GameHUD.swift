@@ -14,37 +14,15 @@ final class GameHUD: UIView {
         health.font = .monospacedDigitSystemFont(ofSize: 17, weight: .semibold)
         health.textColor = .label
         health.accessibilityIdentifier = "playerHealth"
-        let savedText = UILabel()
-        savedText.font = .preferredFont(forTextStyle: .caption1)
-        savedText.adjustsFontForContentSizeCategory = true
-        savedText.textColor = .secondaryLabel
-        savedText.numberOfLines = 0
-        savedText.accessibilityIdentifier = "bundledWriteProbe"
-        // Read only the installed bundle, once. Saving in Debug cannot change this label.
-        if let file = Bundle.main.url(forResource: "repository-write-test", withExtension: "txt", subdirectory: "WriteProbe") {
-            do {
-                savedText.text = try String(contentsOf: file, encoding: .utf8)
-            } catch {
-                savedText.text = "Could not read text file: \(error.localizedDescription)"
-            }
-        } else {
-            savedText.text = "no text file found"
-        }
         let stack = UIStackView(arrangedSubviews: [heart, health])
         stack.alignment = .center
         stack.spacing = 6
         stack.translatesAutoresizingMaskIntoConstraints = false
-        let content = UIStackView(arrangedSubviews: [savedText, stack])
-        content.axis = .vertical
-        content.alignment = .leading
-        content.spacing = 2
-        content.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(content)
+        addSubview(stack)
         NSLayoutConstraint.activate([
-            content.topAnchor.constraint(equalTo: topAnchor, constant: 4),
-            content.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -4),
-            content.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 12),
-            content.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -12),
+            heightAnchor.constraint(equalToConstant: 38),
+            stack.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 12),
+            stack.centerYAnchor.constraint(equalTo: centerYAnchor),
             heart.widthAnchor.constraint(equalToConstant: 32),
             heart.heightAnchor.constraint(equalToConstant: 32)
         ])
@@ -62,19 +40,17 @@ final class GameToolbar: UIView {
     var onNewGame: (() -> Void)?
     var onToggleZoom: (() -> Void)?
     var onTogglePause: (() -> Void)?
-    var onDebug: (() -> Void)?
+    var onDev: (() -> Void)?
     private var zoomButton: UIButton!
     private var pauseButton: UIButton!
 
     init() {
         super.init(frame: .zero)
         let newGame = item(title: "New Game", symbol: "arrow.clockwise", identifier: "newGame", action: #selector(newGameTapped))
-        zoomButton = item(title: "Zoom Out", symbol: "minus.magnifyingglass", identifier: "zoomToggle", action: #selector(zoomTapped))
-        let raise = item(title: "Raise", symbol: "person.badge.plus", identifier: "raise")
-        raise.isEnabled = false
+        zoomButton = item(title: "Zoom", symbol: "magnifyingglass", identifier: "zoomToggle", action: #selector(zoomTapped))
         pauseButton = item(title: "Pause", symbol: "pause.fill", identifier: "pauseToggle", action: #selector(pauseTapped))
-        let debug = item(title: "Debug", symbol: "ladybug", identifier: "debug", action: #selector(debugTapped))
-        let stack = UIStackView(arrangedSubviews: [newGame, zoomButton, raise, pauseButton, debug])
+        let dev = item(title: "Dev", symbol: "ladybug", identifier: "dev", action: #selector(devTapped))
+        let stack = UIStackView(arrangedSubviews: [newGame, zoomButton, pauseButton, dev])
         stack.distribution = .fillEqually
         stack.translatesAutoresizingMaskIntoConstraints = false
         addSubview(stack)
@@ -96,18 +72,15 @@ final class GameToolbar: UIView {
         pauseButton.isEnabled = !gameOver
     }
 
-    func updateZoom(isZoomedOut: Bool) {
-        zoomButton.configuration?.image = UIImage(systemName: isZoomedOut ? "plus.magnifyingglass" : "minus.magnifyingglass")
-        zoomButton.configuration?.title = isZoomedOut ? "Zoom In" : "Zoom Out"
-        zoomButton.accessibilityLabel = zoomButton.configuration?.title
-        zoomButton.accessibilityValue = isZoomedOut ? "50%" : "100%"
+    func updateZoom(percentage: Int) {
+        zoomButton.accessibilityValue = "\(percentage)%"
     }
 
     @objc private func newGameTapped() { onNewGame?() }
     @objc private func zoomTapped() { onToggleZoom?() }
     @objc private func pauseTapped() { onTogglePause?() }
 
-    @objc private func debugTapped() { onDebug?() }
+    @objc private func devTapped() { onDev?() }
 
     private func item(title: String, symbol: String, identifier: String, action: Selector? = nil) -> UIButton {
         var configuration = UIButton.Configuration.plain()

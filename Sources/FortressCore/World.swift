@@ -22,7 +22,6 @@ struct Destructible {
 struct Chair {
     let tile: Tile
     let color: Int
-    let direction: Direction
     var health = Destructible(maximumHP: 40, hp: 40)
 }
 
@@ -77,8 +76,7 @@ struct World {
         walls = stone
         wallVariants = variants
         let chairTile = Tile(x: Int.random(in: -1...1, using: &random), y: Int.random(in: -1...1, using: &random))
-        chair = Chair(tile: chairTile, color: Int.random(in: 0..<3, using: &random),
-                      direction: Direction.allCases.randomElement(using: &random)!)
+        chair = Chair(tile: chairTile, color: Int.random(in: 0..<3, using: &random))
         let indoor = tiles.keys.filter { $0.isInsideRoom && $0 != chairTile }.sorted()
         playerStart = indoor.randomElement(using: &random)!
         let outside = tiles.keys.filter { (4...6).contains(max(abs($0.x), abs($0.y))) }.sorted()

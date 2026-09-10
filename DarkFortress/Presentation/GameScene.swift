@@ -15,7 +15,9 @@ final class GameScene: SKScene {
     private var didShowDeath = false
     private var pixelsPerArtPixel: CGFloat = 5
     private var normalCameraScale: CGFloat = 0.6
-    private(set) var isZoomedOut = false
+    private(set) var zoomLevel = 0
+    private var zoomMultiplier: CGFloat { [1, 2, 4][zoomLevel] }
+    var zoomPercentage: Int { [100, 50, 25][zoomLevel] }
     var onStateChange: ((Simulation) -> Void)?
     var onDeath: (() -> Void)?
 
@@ -43,14 +45,14 @@ final class GameScene: SKScene {
     }
 
     func toggleZoom() {
-        isZoomedOut.toggle()
+        zoomLevel = (zoomLevel + 1) % 3
         updateCameraScale()
         synchronize()
     }
 
     private func updateCameraScale() {
-        // Twice the camera scale renders the world at half its normal size.
-        followCamera.setScale(normalCameraScale * (isZoomedOut ? 2 : 1))
+        // Cycle through normal, half-size, and quarter-size artwork.
+        followCamera.setScale(normalCameraScale * zoomMultiplier)
     }
 
     private func sprite(_ name: String, at tile: Tile, z: CGFloat) -> SKSpriteNode {
@@ -68,8 +70,7 @@ final class GameScene: SKScene {
             _ = sprite("\(name)_\(ground.variant)", at: tile, z: 0)
         }
         for (tile, variant) in world.wallVariants { _ = sprite("wall_\(variant)", at: tile, z: 10) }
-        let chair = sprite("chair_\(world.chair.color)", at: world.chair.tile, z: 12)
-        chair.zRotation = rotation(world.chair.direction)
+        _ = sprite("chair_\(world.chair.color)", at: world.chair.tile, z: 12)
         gateNode = sprite("gate_0", at: world.gateTile, z: 10)
         if world.gateDirection == .east || world.gateDirection == .west { gateNode.zRotation = .pi / 2 }
         worldNode.addChild(pathOverlay)
@@ -77,15 +78,6 @@ final class GameScene: SKScene {
             let node = ActorNode(textures: textures)
             actorNodes[actor.id] = node
             worldNode.addChild(node)
-        }
-    }
-
-    private func rotation(_ direction: Direction) -> CGFloat {
-        switch direction {
-        case .south: return 0
-        case .east: return .pi / 2
-        case .north: return .pi
-        case .west: return -.pi / 2
         }
     }
 
@@ -125,7 +117,7 @@ final class GameScene: SKScene {
         let player = simulation.player.position
         let target = CGPoint(x: player.x * 32, y: player.y * 32)
         // Exact follow and physical-pixel alignment preserve crisp scenery during movement.
-        let cameraPixelsPerArtPixel = pixelsPerArtPixel / (isZoomedOut ? 2 : 1)
+        let cameraPixelsPerArtPixel = pixelsPerArtPixel / zoomMultiplier
         followCamera.position = CGPoint(x: (target.x * cameraPixelsPerArtPixel).rounded() / cameraPixelsPerArtPixel,
                                         y: (target.y * cameraPixelsPerArtPixel).rounded() / cameraPixelsPerArtPixel)
         if shownHP != simulation.player.health.hp || !cameraReady {

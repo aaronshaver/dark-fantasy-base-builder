@@ -38,8 +38,9 @@ final class GameViewController: UIViewController {
             gameView.leadingAnchor.constraint(equalTo: view.leadingAnchor), gameView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
         ])
         configureOverlays()
-        toolbar.onDebug = { [weak self] in
-            self?.present(UINavigationController(rootViewController: DebugViewController()), animated: true)
+        toolbar.onDev = { [weak self] in
+            self?.pauseForInterruption()
+            self?.present(UINavigationController(rootViewController: DevViewController()), animated: true)
         }
         toolbar.onNewGame = { [weak self] in self?.startNewGame() }
         toolbar.onToggleZoom = { [weak self] in self?.toggleZoom() }
@@ -62,7 +63,11 @@ final class GameViewController: UIViewController {
 
     private func configureOverlays() {
         message.textAlignment = .center
-        message.numberOfLines = 0
+        message.numberOfLines = 1
+        message.font = .systemFont(ofSize: 88, weight: .bold)
+        message.textColor = UIColor(white: 0.5, alpha: 0.75)
+        message.adjustsFontSizeToFitWidth = true
+        message.minimumScaleFactor = 0.5
         message.isHidden = true
         message.isUserInteractionEnabled = false
         message.accessibilityIdentifier = "gameMessage"
@@ -92,9 +97,6 @@ final class GameViewController: UIViewController {
         scene.onDeath = { [weak self] in self?.showDeath() }
         gameScene = scene
         gameView.presentScene(scene)
-        #if DEBUG
-        if ProcessInfo.processInfo.arguments.contains("--paused") { scene.setPaused(true) }
-        #endif
         updateHUD(scene.simulation)
         updatePausePresentation()
     }
@@ -102,13 +104,13 @@ final class GameViewController: UIViewController {
     private func updateHUD(_ simulation: Simulation) {
         hud.update(hp: simulation.player.health.hp)
         toolbar.update(isPaused: simulation.isPaused, gameOver: simulation.isGameOver)
-        toolbar.updateZoom(isZoomedOut: gameScene?.isZoomedOut ?? false)
+        toolbar.updateZoom(percentage: gameScene?.zoomPercentage ?? 100)
     }
 
     private func toggleZoom() {
         guard let scene = gameScene else { return }
         scene.toggleZoom()
-        toolbar.updateZoom(isZoomedOut: scene.isZoomedOut)
+        toolbar.updateZoom(percentage: scene.zoomPercentage)
     }
 
     private func togglePause() {
@@ -130,16 +132,12 @@ final class GameViewController: UIViewController {
         message.isHidden = !simulation.isPaused
         if simulation.isPaused {
             message.attributedText = nil
-            message.font = .systemFont(ofSize: 36, weight: .semibold)
-            message.textColor = .label
             message.text = "Paused"
         }
     }
 
     private func showDeath() {
         message.attributedText = nil
-        message.font = .systemFont(ofSize: 48, weight: .bold)
-        message.textColor = .white
         message.text = "You died"
         message.isHidden = false
         if let simulation = gameScene?.simulation { updateHUD(simulation) }
