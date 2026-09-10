@@ -68,11 +68,16 @@ final class Simulation {
                     actors[index].movement = movement
                 }
             }
+        }
+        for index in actors.indices {
             advanceAttack(index, delta: delta)
             if isGameOver { return }
         }
         updatePlayer()
-        for index in actors.indices.dropFirst() { updateEnemy(index) }
+        for index in actors.indices.dropFirst() {
+            updateEnemy(index)
+            if isGameOver { return }
+        }
     }
 
     func occupiedTiles(excluding id: Int) -> Set<Tile> {
@@ -137,7 +142,11 @@ final class Simulation {
     }
 
     private func beginAttack(_ index: Int, target: AttackTarget, tile: Tile) {
-        guard actors[index].cooldown <= 0 else { return }
+        guard !isGameOver, actors[index].isAlive, actors[index].movement == nil,
+              actors[index].attack == nil, actors[index].cooldown <= 0 else { return }
+        if target == .player {
+            guard player.isAlive, inMeleeRange(index) else { return }
+        }
         actors[index].facing = .facing(from: actors[index].tile, to: tile)
         actors[index].attack = Attack(target: target)
         actors[index].cooldown = GameBalance.attackInterval
@@ -146,7 +155,8 @@ final class Simulation {
     private func advanceAttack(_ index: Int, delta: Double) {
         guard var attack = actors[index].attack else { return }
         attack.elapsed += delta
-        if attack.elapsed >= GameBalance.attackWindup && !attack.delivered {
+        if attack.hasReachedContact && !attack.delivered {
+            // Resolve exactly once, including misses. Recovery never queues another hit.
             attack.delivered = true
             switch attack.target {
             case .gate:
@@ -156,24 +166,21 @@ final class Simulation {
                     if world.gate.isDestroyed { events.append(.gateDestroyed) }
                 }
             case .player:
-                // A swing commits at melee range while the attacker stands on its tile.
-                // Stepping away during the short wind-up does not cancel an earned hit.
-                if player.isAlive {
+                if player.isAlive && inMeleeRange(index, reach: GameBalance.swordReach) {
                     actors[0].health.damage(GameBalance.playerDamage)
                     events.append(.playerDamaged(player.health.hp))
                     if !player.isAlive { endGame() }
                 }
             }
         }
-        if !isGameOver {
-            actors[index].attack = attack.elapsed >= GameBalance.attackInterval ? nil : attack
-        }
+        // Preserve the fatal swing's contact pose when the game freezes.
+        actors[index].attack = !isGameOver && attack.elapsed >= GameBalance.attackInterval ? nil : attack
     }
 
-    private func inMeleeRange(_ index: Int) -> Bool {
+    private func inMeleeRange(_ index: Int, reach: Double = GameBalance.meleeEngagementRange) -> Bool {
         let target = player.position
         let source = actors[index].tile
-        return abs(target.x - Double(source.x)) + abs(target.y - Double(source.y)) <= 1.15
+        return abs(target.x - Double(source.x)) + abs(target.y - Double(source.y)) <= reach + 0.0000001
     }
 
     private func endGame() {

@@ -14,6 +14,8 @@ final class GameScene: SKScene {
     private var shownHP = -1
     private var didShowDeath = false
     private var pixelsPerArtPixel: CGFloat = 5
+    private var normalCameraScale: CGFloat = 0.6
+    private(set) var isZoomedOut = false
     var onStateChange: ((Simulation) -> Void)?
     var onDeath: (() -> Void)?
 
@@ -35,8 +37,20 @@ final class GameScene: SKScene {
     override func didMove(to view: SKView) {
         let displayScale = view.window?.screen.scale ?? UIScreen.main.scale
         pixelsPerArtPixel = (displayScale * 1.65).rounded()
-        followCamera.setScale(displayScale / pixelsPerArtPixel)
+        normalCameraScale = displayScale / pixelsPerArtPixel
+        updateCameraScale()
         synchronize()
+    }
+
+    func toggleZoom() {
+        isZoomedOut.toggle()
+        updateCameraScale()
+        synchronize()
+    }
+
+    private func updateCameraScale() {
+        // Twice the camera scale renders the world at half its normal size.
+        followCamera.setScale(normalCameraScale * (isZoomedOut ? 2 : 1))
     }
 
     private func sprite(_ name: String, at tile: Tile, z: CGFloat) -> SKSpriteNode {
@@ -90,7 +104,7 @@ final class GameScene: SKScene {
             switch event {
             case .gateDamaged: flash(at: simulation.world.gateTile)
             case .gateDestroyed: destroyGate()
-            case .playerDamaged: flash(at: simulation.player.tile)
+            case .playerDamaged: actorNodes[simulation.player.id]?.flashDamage()
             case .playerDied:
                 if !didShowDeath {
                     didShowDeath = true
@@ -111,8 +125,9 @@ final class GameScene: SKScene {
         let player = simulation.player.position
         let target = CGPoint(x: player.x * 32, y: player.y * 32)
         // Exact follow and physical-pixel alignment preserve crisp scenery during movement.
-        followCamera.position = CGPoint(x: (target.x * pixelsPerArtPixel).rounded() / pixelsPerArtPixel,
-                                        y: (target.y * pixelsPerArtPixel).rounded() / pixelsPerArtPixel)
+        let cameraPixelsPerArtPixel = pixelsPerArtPixel / (isZoomedOut ? 2 : 1)
+        followCamera.position = CGPoint(x: (target.x * cameraPixelsPerArtPixel).rounded() / cameraPixelsPerArtPixel,
+                                        y: (target.y * cameraPixelsPerArtPixel).rounded() / cameraPixelsPerArtPixel)
         if shownHP != simulation.player.health.hp || !cameraReady {
             shownHP = simulation.player.health.hp
             cameraReady = true

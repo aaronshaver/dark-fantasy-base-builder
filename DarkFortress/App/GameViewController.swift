@@ -39,6 +39,7 @@ final class GameViewController: UIViewController {
         ])
         configureOverlays()
         toolbar.onNewGame = { [weak self] in self?.startNewGame() }
+        toolbar.onToggleZoom = { [weak self] in self?.toggleZoom() }
         toolbar.onTogglePause = { [weak self] in self?.togglePause() }
         NotificationCenter.default.addObserver(self, selector: #selector(pauseForInterruption),
                                                name: UIApplication.willResignActiveNotification, object: nil)
@@ -100,6 +101,13 @@ final class GameViewController: UIViewController {
     private func updateHUD(_ simulation: Simulation) {
         hud.update(hp: simulation.player.health.hp)
         toolbar.update(isPaused: simulation.isPaused, gameOver: simulation.isGameOver)
+        toolbar.updateZoom(isZoomedOut: gameScene?.isZoomedOut ?? false)
+    }
+
+    private func toggleZoom() {
+        guard let scene = gameScene else { return }
+        scene.toggleZoom()
+        toolbar.updateZoom(isZoomedOut: scene.isZoomedOut)
     }
 
     private func togglePause() {
@@ -128,12 +136,10 @@ final class GameViewController: UIViewController {
     }
 
     private func showDeath() {
-        message.attributedText = NSAttributedString(string: "You died", attributes: [
-            .font: UIFont.systemFont(ofSize: 48, weight: .bold),
-            .foregroundColor: GamePalette.purple,
-            .strokeColor: UIColor.white,
-            .strokeWidth: -1.0
-        ])
+        message.attributedText = nil
+        message.font = .systemFont(ofSize: 48, weight: .bold)
+        message.textColor = .white
+        message.text = "You died"
         message.isHidden = false
         if let simulation = gameScene?.simulation { updateHUD(simulation) }
         UIAccessibility.post(notification: .announcement, argument: "You died")

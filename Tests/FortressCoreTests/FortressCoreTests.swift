@@ -49,14 +49,14 @@ final class FortressCoreTests: XCTestCase {
     }
 
     func testDamageStagesAndHealthClamp() {
-        var gate = Destructible(maximumHP: 90, hp: 90)
+        var gate = Destructible(maximumHP: 45, hp: 45)
         XCTAssertEqual(gate.damageStage, 0)
-        gate.damage(30)
+        gate.damage(15)
         XCTAssertEqual(gate.damageStage, 1)
-        gate.damage(30)
+        gate.damage(15)
         XCTAssertEqual(gate.damageStage, 2)
         gate.damage(-100)
-        XCTAssertEqual(gate.hp, 30)
+        XCTAssertEqual(gate.hp, 15)
         gate.damage(100)
         XCTAssertEqual(gate.hp, 0)
         XCTAssertTrue(gate.isDestroyed)
@@ -68,7 +68,7 @@ final class FortressCoreTests: XCTestCase {
         XCTAssertNil(Pathfinder.path(from: world.playerStart, to: goal, world: world))
         XCTAssertNil(Pathfinder.path(from: world.playerStart, to: world.gateTile, world: world))
         XCTAssertNotNil(Pathfinder.path(from: world.playerStart, to: world.chair.tile, world: world))
-        world.gate.damage(90)
+        world.gate.damage(world.gate.hp)
         let path = try XCTUnwrap(Pathfinder.path(from: world.playerStart, to: goal, world: world))
         var previous = world.playerStart
         for tile in path {
@@ -102,20 +102,21 @@ final class FortressCoreTests: XCTestCase {
         XCTAssertTrue(simulation.player.route.isEmpty)
     }
 
-    func testThreeStationaryEnemiesBreachInTenSeconds() {
+    func testGateHasHalfHealthAndThreeEnemiesBreachInAboutFiveSeconds() {
         let world = World(seed: 14)
+        XCTAssertEqual(world.gate.hp, 45)
         let simulation = gateScenario(world)
         var firstDamage: Double?
         var destroyedEvents = 0
-        for _ in 0..<660 {
+        for _ in 0..<360 {
             simulation.advance(by: 1.0 / 60)
-            if simulation.world.gate.hp < 90 && firstDamage == nil { firstDamage = simulation.elapsed }
+            if simulation.world.gate.hp < world.gate.hp && firstDamage == nil { firstDamage = simulation.elapsed }
             destroyedEvents += simulation.events.filter { $0 == .gateDestroyed }.count
             if simulation.world.gate.isDestroyed { break }
         }
         XCTAssertTrue(simulation.world.gate.isDestroyed)
         XCTAssertEqual(destroyedEvents, 1)
-        XCTAssertEqual(simulation.elapsed, 10, accuracy: 1)
+        XCTAssertEqual(simulation.elapsed, 5, accuracy: 1)
         XCTAssertNotNil(firstDamage)
         XCTAssertTrue(simulation.world.isWalkable(world.gateTile))
     }
@@ -184,7 +185,7 @@ final class FortressCoreTests: XCTestCase {
         }
     }
 
-    func testRunningAwayDoesNotCancelCommittedMeleeAttack() {
+    func testMeleeWindupPrecedesDamageAndContactPoseAndHitShareOneTick() {
         var world = World(seed: 14)
         world.gate.damage(world.gate.hp)
         let player = Actor(id: 0, kind: .necromancer, tile: .zero,
@@ -194,12 +195,105 @@ final class FortressCoreTests: XCTestCase {
         let simulation = Simulation(world: world, actors: [player, enemy])
         simulation.advance(by: GameBalance.simulationStep)
         XCTAssertNotNil(simulation.enemies.first?.attack)
+        let windupSteps = Int((GameBalance.meleeAttackWindup / GameBalance.simulationStep).rounded())
+        for _ in 0..<(windupSteps - 1) {
+            XCTAssertEqual(simulation.player.health.hp, 30)
+            XCTAssertTrue(simulation.events.isEmpty)
+            XCTAssertEqual(simulation.enemies.first?.attack?.animationFrame, 0)
+            simulation.advance(by: GameBalance.simulationStep)
+        }
+        XCTAssertEqual(simulation.player.health.hp, 30)
+        XCTAssertTrue(simulation.events.isEmpty)
+        simulation.advance(by: GameBalance.simulationStep)
+        XCTAssertEqual(simulation.player.health.hp, 30 - GameBalance.playerDamage)
+        XCTAssertEqual(simulation.events, [.playerDamaged(30 - GameBalance.playerDamage)])
+        XCTAssertEqual(simulation.enemies.first?.attack?.animationFrame, 1)
         XCTAssertTrue(simulation.movePlayer(to: Tile(x: 0, y: 2)))
-        for _ in 0..<22 { simulation.advance(by: GameBalance.simulationStep) }
+        for _ in 0..<22 {
+            simulation.advance(by: GameBalance.simulationStep)
+            XCTAssertTrue(simulation.events.isEmpty, "Recovery must not emit a delayed hit")
+        }
         XCTAssertNotNil(simulation.player.movement)
         XCTAssertEqual(simulation.player.health.hp, 30 - GameBalance.playerDamage)
         XCTAssertEqual(simulation.enemies.first?.tile, enemy.tile)
         XCTAssertNil(simulation.enemies.first?.movement)
+    }
+
+    func testPursuitOnlyDamagesMovingPlayerWhileActuallyInReach() {
+        var world = World(seed: 14)
+        world.gate.damage(world.gate.hp)
+        let player = Actor(id: 0, kind: .necromancer, tile: Tile(x: 0, y: 5),
+                           health: Destructible(maximumHP: 100, hp: 100))
+        let enemy = Actor(id: 1, kind: .human, tile: Tile(x: 0, y: 4),
+                          health: Destructible(maximumHP: 20, hp: 20))
+        let simulation = Simulation(world: world, actors: [player, enemy])
+        XCTAssertTrue(simulation.movePlayer(to: Tile(x: 0, y: 11)))
+        var hits = 0
+        for _ in 0..<360 {
+            simulation.advance(by: GameBalance.simulationStep)
+            for event in simulation.events {
+                guard case .playerDamaged = event else { continue }
+                hits += 1
+                let position = simulation.player.position
+                let attacker = simulation.actors[1]
+                let distance = abs(position.x - Double(attacker.tile.x)) + abs(position.y - Double(attacker.tile.y))
+                XCTAssertLessThanOrEqual(distance, GameBalance.swordReach + 0.0000001)
+                XCTAssertNil(attacker.movement)
+                XCTAssertEqual(attacker.attack?.animationFrame, 1)
+            }
+        }
+        XCTAssertGreaterThan(hits, 1)
+    }
+
+    func testLeavingSwordReachDuringWindupMissesWithoutDelayedDamage() {
+        var world = World(seed: 14)
+        world.gate.damage(world.gate.hp)
+        var player = Actor(id: 0, kind: .necromancer, tile: .zero,
+                           health: Destructible(maximumHP: 30, hp: 30))
+        // Start just inside engagement range, then move beyond sword reach during wind-up.
+        player.movement = Movement(from: .zero, to: Tile(x: 0, y: 1), duration: 0.5, elapsed: 0.05)
+        let enemy = Actor(id: 1, kind: .human, tile: Tile(x: 0, y: -1),
+                          health: Destructible(maximumHP: 20, hp: 20))
+        let simulation = Simulation(world: world, actors: [player, enemy])
+        simulation.advance(by: GameBalance.simulationStep)
+        XCTAssertEqual(simulation.enemies.first?.attack?.animationFrame, 0)
+        let windupSteps = Int((GameBalance.meleeAttackWindup / GameBalance.simulationStep).rounded())
+        for _ in 0..<windupSteps {
+            simulation.advance(by: GameBalance.simulationStep)
+            XCTAssertEqual(simulation.player.health.hp, 30)
+            XCTAssertTrue(simulation.events.isEmpty)
+        }
+        XCTAssertGreaterThan(simulation.player.position.y + 1, GameBalance.swordReach)
+        XCTAssertEqual(simulation.enemies.first?.attack?.animationFrame, 1)
+        XCTAssertEqual(simulation.enemies.first?.attack?.delivered, true)
+        // Re-enter reach during recovery: the missed swing must remain a miss.
+        XCTAssertTrue(simulation.movePlayer(to: .zero))
+        for _ in 0..<40 {
+            simulation.advance(by: GameBalance.simulationStep)
+            XCTAssertEqual(simulation.player.health.hp, 30)
+            XCTAssertTrue(simulation.events.isEmpty)
+            XCTAssertNil(simulation.enemies.first?.movement)
+        }
+    }
+
+    func testLethalContactStopsOtherAttackersInTheSameTick() {
+        var world = World(seed: 14)
+        world.gate.damage(world.gate.hp)
+        let player = Actor(id: 0, kind: .necromancer, tile: .zero,
+                           health: Destructible(maximumHP: 4, hp: 4))
+        let enemies = [Tile(x: 0, y: -1), Tile(x: -1, y: 0), Tile(x: 1, y: 0)].enumerated().map { index, tile in
+            Actor(id: index + 1, kind: .human, tile: tile, health: Destructible(maximumHP: 20, hp: 20))
+        }
+        let simulation = Simulation(world: world, actors: [player] + enemies)
+        simulation.advance(by: GameBalance.simulationStep)
+        XCTAssertFalse(simulation.isGameOver)
+        let windupSteps = Int((GameBalance.meleeAttackWindup / GameBalance.simulationStep).rounded())
+        for _ in 0..<windupSteps { simulation.advance(by: GameBalance.simulationStep) }
+        XCTAssertTrue(simulation.isGameOver)
+        XCTAssertEqual(simulation.events, [.playerDamaged(0), .playerDied])
+        XCTAssertEqual(simulation.actors[1].attack?.animationFrame, 1)
+        XCTAssertTrue(simulation.actors.allSatisfy { $0.movement == nil })
+        XCTAssertTrue(simulation.actors.dropFirst(2).allSatisfy { $0.attack == nil })
     }
 
     private func gateScenario(_ world: World) -> Simulation {

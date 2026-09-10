@@ -38,18 +38,19 @@ final class GameHUD: UIView {
 
 final class GameToolbar: UIToolbar {
     var onNewGame: (() -> Void)?
+    var onToggleZoom: (() -> Void)?
     var onTogglePause: (() -> Void)?
+    private var zoomButton: UIBarButtonItem!
     private var pauseButton: UIBarButtonItem!
 
     init() {
         super.init(frame: .zero)
         let newGame = item(title: "New Game", symbol: "arrow.clockwise", identifier: "newGame", action: #selector(newGameTapped))
-        let build = item(title: "Build", symbol: "hammer", identifier: "build")
-        build.isEnabled = false
+        zoomButton = item(title: "Zoom Out", symbol: "minus.magnifyingglass", identifier: "zoomToggle", action: #selector(zoomTapped))
         let raise = item(title: "Raise", symbol: "person.badge.plus", identifier: "raise")
         raise.isEnabled = false
         pauseButton = item(title: "Pause", symbol: "pause.fill", identifier: "pauseToggle", action: #selector(pauseTapped))
-        setItems([newGame, .flexibleSpace(), build, .flexibleSpace(), raise, .flexibleSpace(), pauseButton], animated: false)
+        setItems([newGame, .flexibleSpace(), zoomButton, .flexibleSpace(), raise, .flexibleSpace(), pauseButton], animated: false)
         heightAnchor.constraint(equalToConstant: 44).isActive = true
     }
 
@@ -62,7 +63,15 @@ final class GameToolbar: UIToolbar {
         pauseButton.isEnabled = !gameOver
     }
 
+    func updateZoom(isZoomedOut: Bool) {
+        zoomButton.image = UIImage(systemName: isZoomedOut ? "plus.magnifyingglass" : "minus.magnifyingglass")
+        zoomButton.title = isZoomedOut ? "Zoom In" : "Zoom Out"
+        zoomButton.accessibilityLabel = zoomButton.title
+        zoomButton.accessibilityValue = isZoomedOut ? "50%" : "100%"
+    }
+
     @objc private func newGameTapped() { onNewGame?() }
+    @objc private func zoomTapped() { onToggleZoom?() }
     @objc private func pauseTapped() { onTogglePause?() }
 
     private func item(title: String, symbol: String, identifier: String, action: Selector? = nil) -> UIBarButtonItem {

@@ -89,12 +89,16 @@ struct World {
 enum GameBalance {
     static let enemyCount = 3
     static let playerHP = 30
-    static let gateHP = 90
+    static let gateHP = 45
     static let playerTilesPerSecond = 2.0
     static let enemyTilesPerSecond = playerTilesPerSecond * 1.5
     static let attackInterval = 1.0
     static let attackWindup = 1.0 / 3.0
-    static let gateDamage = 3  // Three attackers × 3 damage × 10 volleys = 90 HP.
+    static let meleeAttackWindup = 0.20
+    static let meleeEngagementRange = 1.15
+    static let swordReach = 1.5
+    static let attackContactDuration = 0.15
+    static let gateDamage = 3  // Three attackers × 3 damage × 5 volleys = 45 HP.
     static let playerDamage = 4
     static let simulationStep = 1.0 / 60.0
 }

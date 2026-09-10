@@ -16,6 +16,19 @@ struct Attack {
     let target: AttackTarget
     var elapsed: Double = 0
     var delivered = false
+
+    var contactTime: Double {
+        target == .player ? GameBalance.meleeAttackWindup : GameBalance.attackWindup
+    }
+
+    var hasReachedContact: Bool { elapsed + 0.0000001 >= contactTime }
+
+    var animationFrame: Int {
+        // The renderer and damage resolution share the exact same contact boundary.
+        if !hasReachedContact { return 0 }
+        if elapsed < contactTime + GameBalance.attackContactDuration { return 1 }
+        return 2
+    }
 }
 
 struct Actor {

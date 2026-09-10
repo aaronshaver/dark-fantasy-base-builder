@@ -11,6 +11,16 @@ final class ActorNode: SKSpriteNode {
 
     required init?(coder: NSCoder) { fatalError("Programmatic scene") }
 
+    func flashDamage() {
+        childNode(withName: "damageFlash")?.removeFromParent()
+        let flash = SKSpriteNode(texture: textures.texture("damage_flash"), size: CGSize(width: 32, height: 32))
+        flash.name = "damageFlash"
+        flash.zPosition = 20
+        // Local coordinates keep the feedback on the actor throughout its movement.
+        addChild(flash)
+        flash.run(.sequence([.wait(forDuration: 0.10), .removeFromParent()]))
+    }
+
     func synchronize(_ actor: Actor, time: Double) {
         let location = actor.position
         position = CGPoint(x: location.x * 32, y: location.y * 32)
@@ -20,7 +30,7 @@ final class ActorNode: SKSpriteNode {
         let frame: Int
         if let attack = actor.attack {
             action = "attack"
-            frame = min(2, Int(attack.elapsed / (GameBalance.attackInterval / 3)))
+            frame = attack.animationFrame
         } else if actor.movement != nil {
             action = "walk"
             frame = Int(time / 0.18) % 4
