@@ -1,7 +1,7 @@
 import PixelArt
 
 enum PropRecipes {
-    static func gates(_ p: ParameterValues) throws -> [ArtFrame] {
+    static func metalGates(_ p: ParameterValues) throws -> [ArtFrame] {
         let barWidth = try p.integer("barWidth"), lockWidth = try p.integer("lockWidth")
         return (0..<3).map { stage in
             var surround = Drawing(), rail = Drawing(), lock = Drawing(), damage = Drawing()
@@ -30,7 +30,7 @@ enum PropRecipes {
                 damage.line(5, 21, 13, 25, "ink"); damage.rect(16, 22, 7, 4, "ink")
             }
             children.append(damage.part("damage", z: 10))
-            return ArtFrame("gate_\(stage)", children)
+            return ArtFrame("door_metal_gate_\(stage)", children)
         }
     }
 
@@ -46,7 +46,7 @@ enum PropRecipes {
             back.rect(4, 3, 13, 1, colors.2)
             seat.rect(0, 0, seatWidth, 8, "wood_dark"); seat.rect(2, 0, seatWidth - 4, 6, colors.1)
             seat.rect(2, 0, seatWidth - 4, 1, colors.2); seat.rect(1, 7, seatWidth - 2, 2, "wood_light")
-            return ArtFrame("chair_\(v)", [shadow.part("shadow"), legs.part("legs", z: 1),
+            return ArtFrame("furniture_chair_\(v)", [shadow.part("shadow"), legs.part("legs", z: 1),
                 back.part("back", z: 2, placement: Placement(6, Double(18 - backHeight)),
                           anchors: ["seat": Point(10.5, Double(backHeight - 1))]),
                 seat.part("seat", z: 3, placement: Placement(attached: Attachment(to: "back", anchor: "seat", own: "center")),

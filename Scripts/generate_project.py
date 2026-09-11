@@ -107,7 +107,7 @@ for name, sources, extension, product_type in [
     if extension == 'app':
         settings.update(INFOPLIST_FILE='DarkFortress/Info.plist', ASSETCATALOG_COMPILER_APPICON_NAME='AppIcon',
                         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME='', GENERATE_INFOPLIST_FILE='NO',
-                        MARKETING_VERSION='0.1.0', CURRENT_PROJECT_VERSION='1')
+                        MARKETING_VERSION='0.2.0', CURRENT_PROJECT_VERSION='1')
     else:
         settings.update(GENERATE_INFOPLIST_FILE='YES')
         proxy = add('proxy:' + name, 'PBXContainerItemProxy', containerPortal=identity('project'), proxyType=1,

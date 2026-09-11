@@ -11,21 +11,21 @@ final class Simulation {
     private var accumulator: Double = 0
 
     var player: Actor { actors[0] }
-    var enemies: ArraySlice<Actor> { actors.dropFirst() }
+    var enemies: [Actor] { actors.filter { $0.affiliation == .hostile } }
 
     convenience init(seed: UInt64 = UInt64.random(in: .min ... .max)) {
         let world = World(seed: seed)
-        var actors = [Actor(id: 0, kind: .necromancer, tile: world.playerStart,
+        var actors = [Actor(id: 0, kind: .player, tile: world.playerStart,
                         health: Destructible(maximumHP: GameBalance.playerHP, hp: GameBalance.playerHP))]
         actors += world.enemyStarts.enumerated().map { offset, tile in
-            Actor(id: offset + 1, kind: .human, tile: tile, health: Destructible(maximumHP: 20, hp: 20))
+            Actor(id: offset + 1, kind: .enemyMeleeSword, tile: tile, health: Destructible(maximumHP: 20, hp: 20))
         }
         self.init(world: world, actors: actors)
     }
 
     /// Explicit initial state supports deterministic scenarios as well as generated worlds.
     init(world: World, actors: [Actor]) {
-        precondition(actors.first?.kind == .necromancer)
+        precondition(actors.first?.kind == .player)
         precondition(Set(actors.map(\.id)).count == actors.count)
         self.world = world
         self.actors = actors
@@ -33,10 +33,11 @@ final class Simulation {
 
     @discardableResult
     func movePlayer(to destination: Tile) -> Bool {
-        guard !isGameOver, !isPaused, world.isWalkable(destination) else { return false }
+        guard !isGameOver, !isPaused, world.isWalkable(destination, for: player.affiliation) else { return false }
         let start = player.movement?.to ?? player.tile
         let blocked = occupiedTiles(excluding: 0)
-        guard let route = Pathfinder.path(from: start, to: destination, world: world, blocked: blocked) else { return false }
+        guard let route = Pathfinder.path(from: start, to: destination, world: world, for: player.affiliation,
+                                         blocked: blocked, preferStaircase: true) else { return false }
         actors[0].route = route
         actors[0].destination = destination
         return true
@@ -74,7 +75,7 @@ final class Simulation {
             if isGameOver { return }
         }
         updatePlayer()
-        for index in actors.indices.dropFirst() {
+        for index in actors.indices where actors[index].affiliation == .hostile {
             updateEnemy(index)
             if isGameOver { return }
         }
@@ -86,9 +87,9 @@ final class Simulation {
 
     private func beginMove(_ index: Int, to tile: Tile) -> Bool {
         guard actors[index].movement == nil, actors[index].attack == nil,
-              actors[index].tile.distance(to: tile) == 1, world.isWalkable(tile),
+              actors[index].tile.distance(to: tile) == 1, world.isWalkable(tile, for: actors[index].affiliation),
               !occupiedTiles(excluding: actors[index].id).contains(tile) else { return false }
-        let speed = index == 0 ? GameBalance.playerTilesPerSecond : GameBalance.enemyTilesPerSecond
+        let speed = actors[index].affiliation == .friendly ? GameBalance.playerTilesPerSecond : GameBalance.enemyTilesPerSecond
         actors[index].facing = .facing(from: actors[index].tile, to: tile)
         actors[index].movement = Movement(from: actors[index].tile, to: tile, duration: 1 / speed)
         return true
@@ -104,7 +105,8 @@ final class Simulation {
         let blocked = occupiedTiles(excluding: 0)
         // Replan when units obstruct the route. Stop on a tile if no safe route remains.
         if player.route.isEmpty || player.route.contains(where: { blocked.contains($0) }) {
-            guard let route = Pathfinder.path(from: player.tile, to: destination, world: world, blocked: blocked) else {
+            guard let route = Pathfinder.path(from: player.tile, to: destination, world: world, for: player.affiliation,
+                                             blocked: blocked, preferStaircase: true) else {
                 actors[0].route = []
                 actors[0].destination = nil
                 return
@@ -117,26 +119,34 @@ final class Simulation {
     private func updateEnemy(_ index: Int) {
         guard actors[index].isAlive, actors[index].movement == nil, actors[index].attack == nil else { return }
         let tile = actors[index].tile
-        let goals: [Tile]
-        if !world.gate.isDestroyed {
-            if world.gateAttackTiles.contains(tile) {
-                beginAttack(index, target: .gate, tile: world.gateTile)
-                return
-            }
-            goals = world.gateAttackTiles
-        } else {
-            if inMeleeRange(index) {
-                beginAttack(index, target: .player, tile: player.tile)
-                return
-            }
-            let target = player.movement?.to ?? player.tile
-            goals = target.neighbors.filter { world.isWalkable($0) }
+        if inMeleeRange(index) {
+            beginAttack(index, target: .player, tile: player.tile)
+            return
         }
         guard actors[index].decisionDelay <= 0 else { return }
         actors[index].decisionDelay = 0.18
+        let affiliation = actors[index].affiliation
+        let target = player.movement?.to ?? player.tile
         let blocked = occupiedTiles(excluding: actors[index].id)
-        let routes = goals.compactMap { Pathfinder.path(from: tile, to: $0, world: world, blocked: blocked) }
-        if let route = routes.filter({ !$0.isEmpty }).min(by: { $0.count < $1.count }), let next = route.first {
+        let goals = target.neighbors.filter { world.isWalkable($0, for: affiliation) }
+        let routes = goals.compactMap { Pathfinder.path(from: tile, to: $0, world: world, for: affiliation, blocked: blocked) }
+        if let route = routes.min(by: { $0.count < $1.count }) {
+            if let next = route.first { _ = beginMove(index, to: next) }
+            return
+        }
+
+        // If a door blocks pursuit, plan where to breach it. Actual movement still enforces door access.
+        guard let planned = Pathfinder.path(from: tile, to: target, isWalkable: {
+            world.isWalkable($0, for: affiliation) || world.door(at: $0) != nil
+        }), let door = planned.compactMap({ world.door(at: $0) }).first(where: { !$0.allowsPassage(for: affiliation) }) else { return }
+        if door.attackTiles.contains(tile) {
+            beginAttack(index, target: .door(door.tile), tile: door.tile)
+            return
+        }
+        let approaches = door.attackTiles.compactMap {
+            Pathfinder.path(from: tile, to: $0, world: world, for: affiliation, blocked: blocked)
+        }
+        if let route = approaches.min(by: { $0.count < $1.count }), let next = route.first {
             _ = beginMove(index, to: next)
         }
     }
@@ -159,11 +169,12 @@ final class Simulation {
             // Resolve exactly once, including misses. Recovery never queues another hit.
             attack.delivered = true
             switch attack.target {
-            case .gate:
-                if !world.gate.isDestroyed && world.gateAttackTiles.contains(actors[index].tile) {
-                    world.gate.damage(GameBalance.gateDamage)
-                    events.append(.gateDamaged(world.gate.hp))
-                    if world.gate.isDestroyed { events.append(.gateDestroyed) }
+            case .door(let tile):
+                if let door = world.door(at: tile), !door.health.isDestroyed,
+                   door.attackTiles.contains(actors[index].tile),
+                   let damaged = world.damageDoor(at: tile, amount: GameBalance.gateDamage, by: actors[index].affiliation) {
+                    events.append(.doorDamaged(tile, damaged.health.hp))
+                    if damaged.health.isDestroyed { events.append(.doorDestroyed(tile)) }
                 }
             case .player:
                 if player.isAlive && inMeleeRange(index, reach: GameBalance.swordReach) {

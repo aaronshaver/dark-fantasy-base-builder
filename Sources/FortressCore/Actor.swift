@@ -1,6 +1,14 @@
 import Foundation
 
-enum ActorKind { case necromancer, human }
+enum ActorKind {
+    case player, enemyMeleeSword
+    var affiliation: Affiliation {
+        switch self {
+        case .player: return .friendly
+        case .enemyMeleeSword: return .hostile
+        }
+    }
+}
 
 struct Movement {
     let from: Tile
@@ -10,7 +18,7 @@ struct Movement {
     var fraction: Double { min(1, elapsed / duration) }
 }
 
-enum AttackTarget: Equatable { case gate, player }
+enum AttackTarget: Equatable { case door(Tile), player }
 
 struct Attack {
     let target: AttackTarget
@@ -43,6 +51,7 @@ struct Actor {
     var destination: Tile?
     var cooldown: Double = 0
     var decisionDelay: Double = 0
+    var affiliation: Affiliation { kind.affiliation }
     var isAlive: Bool { !health.isDestroyed }
     var reservedTiles: Set<Tile> {
         if let movement { return [movement.from, movement.to] }
@@ -56,8 +65,8 @@ struct Actor {
 }
 
 enum GameEvent: Equatable {
-    case gateDamaged(Int)
-    case gateDestroyed
+    case doorDamaged(Tile, Int)
+    case doorDestroyed(Tile)
     case playerDamaged(Int)
     case playerDied
 }

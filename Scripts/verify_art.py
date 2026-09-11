@@ -29,7 +29,7 @@ for path in files:
     assert len(raw) == 33 * 32, path
     assert all(raw[y * 33] == 0 for y in range(32)), path
     assert all(pixel < len(palette) for y in range(32) for pixel in raw[y * 33 + 1:(y + 1) * 33]), path
-    if path.stem.startswith('wall_'):
+    if path.stem.startswith('wall_stone_'):
         transparent = {(x, y) for y in range(32) for x in range(32) if raw[y * 33 + 1 + x] == 0}
         corners = set()
         for cx, cy, dx, dy in [(0, 0, 1, 1), (31, 0, -1, 1), (0, 31, 1, -1), (31, 31, -1, -1)]:

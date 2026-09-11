@@ -3,8 +3,8 @@ import UIKit
 /// Fixed-size pixel previews wrap within the available width; the enclosing screen owns scrolling.
 final class ArtworkGridView: UIView {
     private var tiles: [ArtworkTileView] = []
-    private let tileSize = CGSize(width: 80, height: 99)
-    private let spacing: CGFloat = 8
+    private let tileSize = CGSize(width: 68, height: 94)
+    private let spacing: CGFloat = 4
     private var previousWidth: CGFloat = 0
 
     func show(_ frames: [(name: String, image: UIImage)]) {
@@ -40,7 +40,7 @@ final class ArtworkGridView: UIView {
 private final class ArtworkTileView: UIView {
     private let imageView: UIImageView
     private let caption = UILabel()
-    private let imageRect = CGRect(x: 8, y: 2, width: 64, height: 64)
+    private let imageRect = CGRect(x: 2, y: 2, width: 64, height: 64)
 
     init(name: String, image: UIImage) {
         imageView = UIImageView(image: image)
@@ -57,7 +57,7 @@ private final class ArtworkTileView: UIView {
         caption.textColor = .secondaryLabel
         caption.textAlignment = .center
         caption.numberOfLines = 2
-        caption.frame = CGRect(x: 0, y: 71, width: 80, height: 28)
+        caption.frame = CGRect(x: 0, y: 70, width: 68, height: 24)
         addSubview(caption)
         isAccessibilityElement = true
         accessibilityLabel = caption.text

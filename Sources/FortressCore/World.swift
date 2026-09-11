@@ -29,58 +29,61 @@ struct World {
     static let radius = 12
     let seed: UInt64
     let ground: [Tile: GroundTile]
-    var walls: [Tile: Destructible]
-    let wallVariants: [Tile: Int]
-    let gateTile: Tile
-    let gateDirection: Direction
-    var gate: Destructible
-    var chair: Chair
+    private(set) var rooms: [Room]
+    private let roomIndices: [Tile: Int]
     let playerStart: Tile
     let enemyStarts: [Tile]
 
-    /// Only the three exterior positions can attack the intact gate, including its diagonals.
-    var gateAttackTiles: [Tile] {
-        let normal = gateDirection.offset
-        let tangent = Tile(x: -normal.y, y: normal.x)
-        let center = gateTile + normal
-        return [center, center + tangent, center - tangent]
+    var doors: [Door] { rooms.map(\.door) }
+    var walls: [Tile: Wall] { rooms.reduce(into: [:]) { $0.merge($1.walls) { current, _ in current } } }
+    var chairs: [Chair] { rooms.flatMap(\.chairs) }
+
+    func door(at tile: Tile) -> Door? {
+        guard let index = roomIndices[tile], rooms[index].door.tile == tile else { return nil }
+        return rooms[index].door
     }
 
-    func isWalkable(_ tile: Tile) -> Bool {
-        ground[tile] != nil && walls[tile] == nil && (tile != gateTile || gate.isDestroyed)
+    func isWalkable(_ tile: Tile, for affiliation: Affiliation) -> Bool {
+        guard ground[tile] != nil else { return false }
+        guard let index = roomIndices[tile] else { return true }
+        let room = rooms[index]
+        if let wall = room.walls[tile], !wall.health.isDestroyed { return false }
+        return room.door.tile != tile || room.door.allowsPassage(for: affiliation)
     }
 
-    init(seed: UInt64) {
+    @discardableResult
+    mutating func damageDoor(at tile: Tile, amount: Int, by affiliation: Affiliation) -> Door? {
+        guard let index = roomIndices[tile], rooms[index].door.tile == tile else { return nil }
+        guard affiliation == .hostile || rooms[index].definition.canBeDestroyedByPlayer else { return nil }
+        rooms[index].door.health.damage(amount)
+        return rooms[index].door
+    }
+
+    init(seed: UInt64, rooms suppliedRooms: [Room]? = nil) {
         self.seed = seed
         var random = SeededRandom(seed: seed)
-        let direction = Direction.allCases.randomElement(using: &random)!
-        gateDirection = direction
-        gateTile = Tile(x: direction.offset.x * 3, y: direction.offset.y * 3)
-        gate = Destructible(maximumHP: GameBalance.gateHP, hp: GameBalance.gateHP)
+        rooms = suppliedRooms ?? [Room(definition: .starter, interiorOrigin: Tile(x: -2, y: -2), random: &random)]
+        let playerStarts = rooms.compactMap(\.playerStart)
+        precondition(playerStarts.count == 1, "The world must contain exactly one player spawn")
+        playerStart = playerStarts[0]
         var tiles: [Tile: GroundTile] = [:]
-        var stone: [Tile: Destructible] = [:]
-        var variants: [Tile: Int] = [:]
         for y in -Self.radius...Self.radius {
             for x in -Self.radius...Self.radius {
-                let tile = Tile(x: x, y: y)
-                let perimeter = max(abs(x), abs(y)) == 3
-                tiles[tile] = GroundTile(terrain: tile.isInsideRoom || tile == gateTile ? .wood : .grass,
-                                         variant: Int.random(in: 0..<4, using: &random))
-                if perimeter && tile != gateTile {
-                    stone[tile] = Destructible(maximumHP: 500, hp: 500)
-                    variants[tile] = Int.random(in: 0..<4, using: &random)
-                }
+                tiles[Tile(x: x, y: y)] = GroundTile(terrain: .grass, variant: Int.random(in: 0..<4, using: &random))
             }
         }
+        var indices: [Tile: Int] = [:]
+        for (index, room) in rooms.enumerated() {
+            for tile in room.tiles {
+                precondition(tiles[tile] != nil && indices[tile] == nil, "Rooms must fit the map without overlapping")
+                indices[tile] = index
+            }
+            tiles.merge(room.floorTiles) { _, floor in floor }
+        }
+        roomIndices = indices
         ground = tiles
-        walls = stone
-        wallVariants = variants
-        let chairTile = Tile(x: Int.random(in: -1...1, using: &random), y: Int.random(in: -1...1, using: &random))
-        chair = Chair(tile: chairTile, color: Int.random(in: 0..<3, using: &random))
-        let indoor = tiles.keys.filter { $0.isInsideRoom && $0 != chairTile }.sorted()
-        playerStart = indoor.randomElement(using: &random)!
-        let outside = tiles.keys.filter { (4...6).contains(max(abs($0.x), abs($0.y))) }.sorted()
-        enemyStarts = Array(outside.shuffled(using: &random).prefix(GameBalance.enemyCount))
+        let edge = tiles.keys.filter { max(abs($0.x), abs($0.y)) == Self.radius && indices[$0] == nil }.sorted()
+        enemyStarts = Array(edge.shuffled(using: &random).prefix(GameBalance.enemyCount))
     }
 }
 

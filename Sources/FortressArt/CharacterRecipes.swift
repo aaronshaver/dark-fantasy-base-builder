@@ -4,12 +4,12 @@ import PixelArt
 /// Pose-specific z and offsets live in the recipe, never in the generic renderer.
 enum CharacterRecipes {
     static func frames(kind: String, parameters p: ParameterValues) throws -> [ArtFrame] {
-        let human = kind == "human"
+        let swordEnemy = kind == "enemy_melee_sword"
         let headWidth = try p.integer("headWidth"), bodyWidth = try p.integer("bodyWidth")
-        let eyeColor = human ? "teal_light" : try p.choice("eyeColor")
+        let eyeColor = swordEnemy ? "teal_light" : try p.choice("eyeColor")
         var frames: [ArtFrame] = []
         for direction in ["north", "east", "south", "west"] {
-            for (action, count) in [("idle", 2), ("walk", 4)] + (human ? [("attack", 3)] : []) {
+            for (action, count) in [("idle", 2), ("walk", 4)] + (swordEnemy ? [("attack", 3)] : []) {
                 for phase in 0..<count {
                     frames.append(frame(kind, direction, action, phase, headWidth, bodyWidth, eyeColor))
                 }
@@ -20,14 +20,14 @@ enum CharacterRecipes {
 
     private static func frame(_ kind: String, _ direction: String, _ action: String, _ phase: Int,
                               _ headWidth: Int, _ bodyWidth: Int, _ eyeColor: String) -> ArtFrame {
-        let human = kind == "human", walking = action == "walk", attack = action == "attack"
+        let swordEnemy = kind == "enemy_melee_sword", walking = action == "walk", attack = action == "attack"
         let bob = (walking && phase % 2 == 1) || (action == "idle" && phase == 1) ? -1 : 0
         let stride = walking ? [-1, 0, 1, 0][phase % 4] : 0
         var shadow = Drawing(), boots = Drawing(), torso = Drawing()
         shadow.rect(9, 27, 15, 2, "grass_dark"); shadow.rect(7, 26, 19, 1, "grass_dark")
         boots.rect(10 - stride, 25, 5, 3, "ink"); boots.rect(18 + stride, 25, 5, 3, "ink")
         // Torso coordinates are local, with shared attachment anchors for the head and arms.
-        if human {
+        if swordEnemy {
             torso.rect(0, 0, 15, 13, "ink"); torso.rect(1, 1, 13, 11, "red_dark")
             torso.rect(2, 1, 11, 7, "steel"); torso.rect(2, 1, 11, 2, "steel_light")
             torso.rect(4, 4, 7, 4, "steel_dark"); torso.rect(6, 9, 3, 5, "red")
@@ -43,8 +43,8 @@ enum CharacterRecipes {
         var bodyChildren = [torso.part("clothing")]
         if direction == "north" {
             var back = Drawing()
-            back.rect(2, 1, 11, 11, human ? "red_dark" : "purple_deep")
-            back.line(3, 2, 3, 11, human ? "red" : "purple")
+            back.rect(2, 1, 11, 11, swordEnemy ? "red_dark" : "purple_deep")
+            back.line(3, 2, 3, 11, swordEnemy ? "red" : "purple")
             bodyChildren.append(back.part("back", z: 1))
         }
         let body = Group("body", z: 2, placement: Placement(Double(9 - bodyWidth), Double(12 + bob), scaleX: bodyScale),
@@ -54,7 +54,7 @@ enum CharacterRecipes {
         // All head details transform together; eyes retain their local order above the face.
         var outline = Drawing(), covering = Drawing(), face = Drawing(), eyes = Drawing()
         outline.rect(0, 1, 11, 10, "ink"); outline.rect(2, 0, 7, 12, "ink")
-        if human {
+        if swordEnemy {
             covering.rect(1, 2, 9, 8, "steel"); covering.rect(2, 1, 7, 3, "steel_light")
             covering.rect(4, 1, 2, 5, "steel_glint")
             if direction != "north" {
@@ -81,7 +81,7 @@ enum CharacterRecipes {
         var leftArm = Drawing(), rightArm = Drawing()
         for isLeft in [true, false] {
             var arm = Drawing()
-            arm.rect(0, 0, 4, 6, human ? "steel_dark" : "purple")
+            arm.rect(0, 0, 4, 6, swordEnemy ? "steel_dark" : "purple")
             arm.rect(1, 5, 3, 3, isLeft ? "skin_dark" : "skin")
             if isLeft { leftArm = arm } else { rightArm = arm }
         }
@@ -90,7 +90,7 @@ enum CharacterRecipes {
                          anchors: ["grip": Point(2, 7)]),
             rightArm.part("rightArm", z: 4, placement: Placement(attached: Attachment(to: "body", anchor: "rightShoulder")),
                           anchors: ["grip": Point(2, 7)])]
-        if human {
+        if swordEnemy {
             var weapon = Drawing()
             if attack && (phase == 1 || phase == 2) {
                 if direction == "north" {

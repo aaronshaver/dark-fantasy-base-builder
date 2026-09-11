@@ -11,7 +11,7 @@ final class ArtworkWorkflowTests: XCTestCase {
     }
 
     func testCandidateContainsAllEnemyFramesAndGenerationDoesNotAcceptIt() throws {
-        let original = try ArtExporter.render(baseline("human"))
+        let original = try ArtExporter.render(baseline("enemy_melee_sword"))
         var session = ArtworkSession(accepted: original)
         try session.generate(intensity: 0.25, seed: 14)
         let candidate = try XCTUnwrap(session.candidate)
@@ -32,7 +32,7 @@ final class ArtworkWorkflowTests: XCTestCase {
     }
 
     func testZeroIntensityAndBadInputKeepTheAcceptedSet() throws {
-        let artwork = try ArtExporter.render(baseline("wood"))
+        let artwork = try ArtExporter.render(baseline("floor_wood"))
         var session = ArtworkSession(accepted: artwork)
         for intensity in [0, -1, 2, Double.nan] { XCTAssertThrowsError(try session.generate(intensity: intensity, seed: 0)) }
         XCTAssertEqual(session.accepted, artwork); XCTAssertNil(session.candidate)
@@ -48,45 +48,57 @@ final class ArtworkWorkflowTests: XCTestCase {
         }
     }
 
+    func testOnePercentGeneratesACompleteChangedCandidateForEveryArtworkKind() throws {
+        for definition in ArtCatalog.definitions {
+            let accepted = try ArtExporter.render(definition.baseline)
+            var session = ArtworkSession(accepted: accepted)
+            try session.generate(intensity: 0.01, seed: 14)
+            let candidate = try XCTUnwrap(session.candidate, definition.name)
+            XCTAssertEqual(candidate.frames.map(\.name), accepted.frames.map(\.name))
+            XCTAssertNotEqual(candidate.frames, accepted.frames, definition.name)
+            XCTAssertEqual(session.accepted, accepted)
+        }
+    }
+
     func testSavePersistsExactEntireSetAndLeavesUnrelatedArtAlone() throws {
         let root = try fixture()
         let store = ArtworkStore(root: root)
-        let original = try store.load(id: "human"), wood = try store.load(id: "wood")
+        let original = try store.load(id: "enemy_melee_sword"), wood = try store.load(id: "floor_wood")
         let before = try snapshot(root)
         let next = try candidate(for: original)
         XCTAssertEqual(try snapshot(root), before, "Generating must not write files")
         try store.save(next, replacing: original)
-        XCTAssertEqual(try ArtworkStore(root: root).load(id: "human"), next)
-        XCTAssertEqual(try store.load(id: "wood"), wood)
+        XCTAssertEqual(try ArtworkStore(root: root).load(id: "enemy_melee_sword"), next)
+        XCTAssertEqual(try store.load(id: "floor_wood"), wood)
         XCTAssertEqual(try ArtExporter.render(next.state), next)
     }
 
     func testSavePreservesOtherRecentlySavedRecipesAndRejectsStaleCandidates() throws {
         let root = try fixture(), store = ArtworkStore(root: root)
-        let human = try store.load(id: "human"), wood = try store.load(id: "wood")
-        let newHuman = try candidate(for: human), newWood = try candidate(for: wood)
+        let swordEnemy = try store.load(id: "enemy_melee_sword"), wood = try store.load(id: "floor_wood")
+        let newSwordEnemy = try candidate(for: swordEnemy), newWood = try candidate(for: wood)
         try store.save(newWood, replacing: wood)
-        try store.save(newHuman, replacing: human)
-        XCTAssertEqual(try store.load(id: "wood"), newWood)
+        try store.save(newSwordEnemy, replacing: swordEnemy)
+        XCTAssertEqual(try store.load(id: "floor_wood"), newWood)
         let after = try snapshot(root)
-        XCTAssertThrowsError(try store.save(newHuman, replacing: human))
+        XCTAssertThrowsError(try store.save(newSwordEnemy, replacing: swordEnemy))
         XCTAssertEqual(try snapshot(root), after)
     }
 
     func testPartialFrameSetsAndWrongEntityCannotBeSaved() throws {
         let root = try fixture(), store = ArtworkStore(root: root)
-        let human = try store.load(id: "human"), wood = try store.load(id: "wood")
-        let next = try candidate(for: human)
+        let swordEnemy = try store.load(id: "enemy_melee_sword"), wood = try store.load(id: "floor_wood")
+        let next = try candidate(for: swordEnemy)
         let partial = RenderedArtwork(state: next.state, frames: Array(next.frames.dropLast()))
         let before = try snapshot(root)
-        XCTAssertThrowsError(try store.save(partial, replacing: human))
+        XCTAssertThrowsError(try store.save(partial, replacing: swordEnemy))
         XCTAssertThrowsError(try store.save(next, replacing: wood))
         XCTAssertEqual(try snapshot(root), before)
     }
 
     func testWriteFailureRestoresEveryPNGAndRecipe() throws {
         let root = try fixture(), store = ArtworkStore(root: root)
-        let accepted = try store.load(id: "human"), next = try candidate(for: accepted)
+        let accepted = try store.load(id: "enemy_melee_sword"), next = try candidate(for: accepted)
         let before = try snapshot(root)
         for failureIndex in [3, 37] { // Mid-animation and final recipe write.
             var count = 0
@@ -97,7 +109,7 @@ final class ArtworkWorkflowTests: XCTestCase {
             }
             XCTAssertThrowsError(try failing.save(next, replacing: accepted))
             XCTAssertEqual(try snapshot(root), before)
-            XCTAssertEqual(try store.load(id: "human"), accepted)
+            XCTAssertEqual(try store.load(id: "enemy_melee_sword"), accepted)
         }
     }
 
@@ -109,7 +121,7 @@ final class ArtworkWorkflowTests: XCTestCase {
         try files.createDirectory(at: root.appendingPathComponent("DarkFortress/Resources/Pixel.atlas"), withIntermediateDirectories: true)
         try files.createDirectory(at: root.appendingPathComponent("Art"), withIntermediateDirectories: true)
         try JSONEncoder().encode(ArtCatalog.definitions.map(\.baseline)).write(to: root.appendingPathComponent("Art/recipes.json"))
-        for id in ["human", "wood"] {
+        for id in ["enemy_melee_sword", "floor_wood"] {
             for frame in try ArtExporter.render(baseline(id)).frames {
                 try frame.png.write(to: root.appendingPathComponent("DarkFortress/Resources/Pixel.atlas/" + frame.name + ".png"))
             }

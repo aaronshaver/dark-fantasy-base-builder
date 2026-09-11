@@ -1,16 +1,16 @@
 [
   {
     "generatorVersion" : 1,
-    "id" : "grass",
+    "id" : "ground_grass",
     "parameters" : {
       "bladeHeight" : {
         "integer" : {
-          "_0" : 0
+          "_0" : 2
         }
       },
       "patchSize" : {
         "integer" : {
-          "_0" : 0
+          "_0" : 2
         }
       },
       "tuftAdjustment" : {
@@ -23,7 +23,7 @@
   },
   {
     "generatorVersion" : 1,
-    "id" : "wood",
+    "id" : "floor_wood",
     "parameters" : {
       "grainCount" : {
         "integer" : {
@@ -45,16 +45,16 @@
   },
   {
     "generatorVersion" : 1,
-    "id" : "wall",
+    "id" : "wall_stone",
     "parameters" : {
       "jointOffset" : {
         "integer" : {
-          "_0" : 0
+          "_0" : -1
         }
       },
       "pitCount" : {
         "integer" : {
-          "_0" : 3
+          "_0" : 1
         }
       }
     },
@@ -62,7 +62,7 @@
   },
   {
     "generatorVersion" : 1,
-    "id" : "gate",
+    "id" : "door_metal_gate",
     "parameters" : {
       "barWidth" : {
         "integer" : {
@@ -79,16 +79,16 @@
   },
   {
     "generatorVersion" : 1,
-    "id" : "chair",
+    "id" : "furniture_chair",
     "parameters" : {
       "backHeight" : {
         "integer" : {
-          "_0" : 12
+          "_0" : 11
         }
       },
       "seatWidth" : {
         "integer" : {
-          "_0" : 19
+          "_0" : 21
         }
       }
     },
@@ -96,7 +96,7 @@
   },
   {
     "generatorVersion" : 1,
-    "id" : "necromancer",
+    "id" : "player",
     "parameters" : {
       "bodyWidth" : {
         "integer" : {
@@ -118,28 +118,16 @@
   },
   {
     "generatorVersion" : 1,
-    "id" : "human",
+    "id" : "enemy_melee_sword",
     "parameters" : {
       "bodyWidth" : {
         "integer" : {
-          "_0" : 0
+          "_0" : -1
         }
       },
       "headWidth" : {
         "integer" : {
-          "_0" : 11
-        }
-      }
-    },
-    "seed" : 170
-  },
-  {
-    "generatorVersion" : 1,
-    "id" : "icons",
-    "parameters" : {
-      "accent" : {
-        "choice" : {
-          "_0" : "lilac"
+          "_0" : 9
         }
       }
     },
@@ -151,12 +139,12 @@
     "parameters" : {
       "debrisLength" : {
         "integer" : {
-          "_0" : 0
+          "_0" : 2
         }
       },
       "markerLength" : {
         "integer" : {
-          "_0" : 5
+          "_0" : 3
         }
       }
     },
@@ -168,7 +156,7 @@
     "parameters" : {
       "towerHeight" : {
         "integer" : {
-          "_0" : 8
+          "_0" : 7
         }
       }
     },

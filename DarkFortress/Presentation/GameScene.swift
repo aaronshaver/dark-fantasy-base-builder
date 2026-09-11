@@ -7,11 +7,11 @@ final class GameScene: SKScene {
     private let followCamera = SKCameraNode()
     private var pathOverlay: PathOverlay
     private var actorNodes: [Int: ActorNode] = [:]
-    private var gateNode = SKSpriteNode()
-    private var gateGroundNodes: [SKSpriteNode] = []
+    private var doorNodes: [Tile: SKSpriteNode] = [:]
+    private var doorGroundNodes: [Tile: [SKSpriteNode]] = [:]
     private var lastUpdate: TimeInterval?
     private var cameraReady = false
-    private var gateStage = -1
+    private var doorStages: [Tile: Int] = [:]
     private var shownHP = -1
     private var didShowDeath = false
     private var pixelsPerArtPixel: CGFloat = 5
@@ -66,22 +66,25 @@ final class GameScene: SKScene {
 
     private func buildWorld() {
         let world = simulation.world
+        let walls = world.walls
         for (tile, ground) in world.ground {
             // Every static tile starts with grass. Walk down from the top layer
             // only while transparency can expose the next layer.
-            var layers = [(name: "grass_\(ground.variant)", z: CGFloat(0))]
-            if ground.terrain == .wood { layers.append(("wood_\(ground.variant)", 1)) }
-            if let variant = world.wallVariants[tile] { layers.append(("wall_\(variant)", 10)) }
+            var layers = [(name: "ground_grass_\(ground.variant)", z: CGFloat(0))]
+            if ground.terrain == .wood { layers.append(("floor_wood_\(ground.variant)", 1)) }
+            if let wall = walls[tile], !wall.health.isDestroyed { layers.append(("wall_stone_\(wall.variant)", 10)) }
             for layer in layers.reversed() {
                 let node = sprite(layer.name, at: tile, z: layer.z)
-                if tile == world.gateTile { gateGroundNodes.append(node) }
+                if world.door(at: tile) != nil { doorGroundNodes[tile, default: []].append(node) }
                 if !textures.hasTransparentPixels(layer.name) { break }
             }
         }
-        _ = sprite("chair_\(world.chair.color)", at: world.chair.tile, z: 12)
-        if !world.gate.isDestroyed {
-            gateNode = sprite("gate_0", at: world.gateTile, z: 10)
-            if world.gateDirection == .east || world.gateDirection == .west { gateNode.zRotation = .pi / 2 }
+        for chair in world.chairs {
+            _ = sprite("furniture_chair_\(chair.color)", at: chair.tile, z: 12)
+        }
+        for door in world.doors where !door.health.isDestroyed {
+            // Friendly actors walk above the unchanged door sprite, just like furniture.
+            doorNodes[door.tile] = sprite("door_metal_gate_0", at: door.tile, z: 10)
         }
         worldNode.addChild(pathOverlay)
         for actor in simulation.actors {
@@ -101,8 +104,9 @@ final class GameScene: SKScene {
     func reloadTextures() {
         worldNode.removeAllChildren()
         actorNodes.removeAll()
-        gateGroundNodes.removeAll()
-        gateStage = -1
+        doorNodes.removeAll()
+        doorGroundNodes.removeAll()
+        doorStages.removeAll()
         pathOverlay = PathOverlay(textures: textures)
         buildWorld()
         synchronize()
@@ -115,8 +119,8 @@ final class GameScene: SKScene {
         synchronize()
         for event in simulation.events {
             switch event {
-            case .gateDamaged: flash(at: simulation.world.gateTile)
-            case .gateDestroyed: destroyGate()
+            case .doorDamaged(let tile, _): flash(at: tile)
+            case .doorDestroyed(let tile): destroyDoor(at: tile)
             case .playerDamaged: actorNodes[simulation.player.id]?.flashDamage()
             case .playerDied:
                 if !didShowDeath {
@@ -130,14 +134,15 @@ final class GameScene: SKScene {
     private func synchronize() {
         for actor in simulation.actors { actorNodes[actor.id]?.synchronize(actor, time: simulation.elapsed) }
         pathOverlay.synchronize(simulation.player)
-        let stage = simulation.world.gate.damageStage
-        if stage != gateStage && !simulation.world.gate.isDestroyed {
-            let name = "gate_\(stage)"
-            gateNode.texture = textures.texture(name)
-            // Keep the ground available for destruction, but don't render it
-            // while an opaque gate covers it.
-            gateGroundNodes.forEach { $0.isHidden = !textures.hasTransparentPixels(name) }
-            gateStage = stage
+        for door in simulation.world.doors where !door.health.isDestroyed {
+            let stage = door.health.damageStage
+            if stage != doorStages[door.tile] {
+                let name = "door_metal_gate_\(stage)"
+                doorNodes[door.tile]?.texture = textures.texture(name)
+                // Preserve the underlayer for destruction while opaque doors cover it.
+                doorGroundNodes[door.tile]?.forEach { $0.isHidden = !textures.hasTransparentPixels(name) }
+                doorStages[door.tile] = stage
+            }
         }
         let player = simulation.player.position
         let target = CGPoint(x: player.x * 32, y: player.y * 32)
@@ -161,11 +166,11 @@ final class GameScene: SKScene {
                             .wait(forDuration: 0.07), .removeFromParent()]))
     }
 
-    private func destroyGate() {
-        gateNode.removeFromParent()
-        gateGroundNodes.forEach { $0.isHidden = false }
+    private func destroyDoor(at tile: Tile) {
+        doorNodes.removeValue(forKey: tile)?.removeFromParent()
+        doorGroundNodes[tile]?.forEach { $0.isHidden = false }
         for index in 0..<8 {
-            let fragment = sprite("debris_\(index % 4)", at: simulation.world.gateTile, z: 40)
+            let fragment = sprite("debris_\(index % 4)", at: tile, z: 40)
             let angle = CGFloat(index) * .pi / 4
             let distance: CGFloat = index.isMultiple(of: 2) ? 20 : 14
             fragment.run(.sequence([

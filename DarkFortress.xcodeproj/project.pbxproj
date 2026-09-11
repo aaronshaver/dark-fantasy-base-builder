@@ -23,6 +23,12 @@
 			"path" = "Sources/FortressCore/Pathfinder.swift";
 			"sourceTree" = "SOURCE_ROOT";
 		};
+		D9EEE6E451A9B08A8F4AFB5A = {
+			"isa" = PBXFileReference;
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Sources/FortressCore/Room.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
 		BAEA9E31871A92CFDAA2BD24 = {
 			"isa" = PBXFileReference;
 			"lastKnownFileType" = "sourcecode.swift";
@@ -35,16 +41,16 @@
 			"path" = "Sources/FortressCore/World.swift";
 			"sourceTree" = "SOURCE_ROOT";
 		};
+		9E61B777C9AD0070D661AA0A = {
+			"isa" = PBXFileReference;
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "DarkFortress/App/AdminViewController.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
 		1EF68D214B8500C87BE2D7AF = {
 			"isa" = PBXFileReference;
 			"lastKnownFileType" = "sourcecode.swift";
 			"path" = "DarkFortress/App/AppDelegate.swift";
-			"sourceTree" = "SOURCE_ROOT";
-		};
-		C2178C4A82BE59CE50DA254D = {
-			"isa" = PBXFileReference;
-			"lastKnownFileType" = "sourcecode.swift";
-			"path" = "DarkFortress/App/DevViewController.swift";
 			"sourceTree" = "SOURCE_ROOT";
 		};
 		ACF2F7FA92B96816CCF236A9 = {
@@ -59,10 +65,10 @@
 			"path" = "DarkFortress/App/SceneDelegate.swift";
 			"sourceTree" = "SOURCE_ROOT";
 		};
-		EED137F69BBEFCE25FA6FC0E = {
+		CD59D3D2EA359FE573C6562A = {
 			"isa" = PBXFileReference;
 			"lastKnownFileType" = "sourcecode.swift";
-			"path" = "DarkFortress/Development/ArtVariationsViewController.swift";
+			"path" = "DarkFortress/Development/ArtVariationGeneratorViewController.swift";
 			"sourceTree" = "SOURCE_ROOT";
 		};
 		AA48CC88DB1E4A3CC97B291E = {
@@ -236,6 +242,10 @@
 			"isa" = PBXBuildFile;
 			"fileRef" = A86DE9F836D0A6D2DFDE9F0B;
 		};
+		720FE5D87625D01F4B9CCFB7 = {
+			"isa" = PBXBuildFile;
+			"fileRef" = D9EEE6E451A9B08A8F4AFB5A;
+		};
 		5AC7E8002D39EBA7325ECC7C = {
 			"isa" = PBXBuildFile;
 			"fileRef" = BAEA9E31871A92CFDAA2BD24;
@@ -244,13 +254,13 @@
 			"isa" = PBXBuildFile;
 			"fileRef" = E1687523ED70A15290B6F749;
 		};
+		9A4CFFFDD08D3CCE9368F417 = {
+			"isa" = PBXBuildFile;
+			"fileRef" = 9E61B777C9AD0070D661AA0A;
+		};
 		3CDD74DF3743DFA6D6675814 = {
 			"isa" = PBXBuildFile;
 			"fileRef" = 1EF68D214B8500C87BE2D7AF;
-		};
-		07BA01F66E08DB3831250BDA = {
-			"isa" = PBXBuildFile;
-			"fileRef" = C2178C4A82BE59CE50DA254D;
 		};
 		B5DA482770872ABC420E7D0C = {
 			"isa" = PBXBuildFile;
@@ -284,9 +294,9 @@
 			"isa" = PBXBuildFile;
 			"fileRef" = B1B6D9C042F5696AAE966878;
 		};
-		DF7986A3B5C29B7766748D8F = {
+		38FC79B13234C679488D5FF8 = {
 			"isa" = PBXBuildFile;
-			"fileRef" = EED137F69BBEFCE25FA6FC0E;
+			"fileRef" = CD59D3D2EA359FE573C6562A;
 		};
 		5E7FB00F92023BB89C2EAAE6 = {
 			"isa" = PBXBuildFile;
@@ -315,10 +325,11 @@
 				18963518177793C17A34C1B0,
 				17401025B28BE5A1D4E84EA2,
 				1AF350639CD95C329D3B9D40,
+				720FE5D87625D01F4B9CCFB7,
 				5AC7E8002D39EBA7325ECC7C,
 				581CD90CF956C3B26E89491E,
+				9A4CFFFDD08D3CCE9368F417,
 				3CDD74DF3743DFA6D6675814,
-				07BA01F66E08DB3831250BDA,
 				B5DA482770872ABC420E7D0C,
 				9A284DFEDA597BFBC279B212,
 				9EB57093A9876F66307159B2,
@@ -327,7 +338,7 @@
 				F4AFF4292633A5AA0A2A4FEF,
 				FE443AED3989FA2909108FB9,
 				14697F912CA11FAE7C08A608,
-				DF7986A3B5C29B7766748D8F,
+				38FC79B13234C679488D5FF8,
 				5E7FB00F92023BB89C2EAAE6,
 				6FB4E54C195E3CE29537BD9E,
 			);
@@ -365,7 +376,7 @@
 				"ASSETCATALOG_COMPILER_APPICON_NAME" = "AppIcon";
 				"ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME" = "";
 				"GENERATE_INFOPLIST_FILE" = "NO";
-				"MARKETING_VERSION" = "0.1.0";
+				"MARKETING_VERSION" = "0.2.0";
 				"CURRENT_PROJECT_VERSION" = "1";
 			};
 			"name" = "Debug";
@@ -384,7 +395,7 @@
 				"ASSETCATALOG_COMPILER_APPICON_NAME" = "AppIcon";
 				"ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME" = "";
 				"GENERATE_INFOPLIST_FILE" = "NO";
-				"MARKETING_VERSION" = "0.1.0";
+				"MARKETING_VERSION" = "0.2.0";
 				"CURRENT_PROJECT_VERSION" = "1";
 			};
 			"name" = "Release";
@@ -437,6 +448,10 @@
 			"isa" = PBXBuildFile;
 			"fileRef" = A86DE9F836D0A6D2DFDE9F0B;
 		};
+		E4504F0A009D5C7D2913701E = {
+			"isa" = PBXBuildFile;
+			"fileRef" = D9EEE6E451A9B08A8F4AFB5A;
+		};
 		9B3E77E66D787077638882DF = {
 			"isa" = PBXBuildFile;
 			"fileRef" = BAEA9E31871A92CFDAA2BD24;
@@ -456,6 +471,7 @@
 				03428C5C6C2D5E3778D5332E,
 				8EFD792FF17438652FC9A100,
 				BBC8B4AE80BCA8D5AB1DB867,
+				E4504F0A009D5C7D2913701E,
 				9B3E77E66D787077638882DF,
 				DB7EC2F1FE97BC8B0E93B991,
 				74873A097D968E09C1E7B1B4,
@@ -656,8 +672,8 @@
 		1C48CE29E4E135EE62951B22 = {
 			"isa" = PBXGroup;
 			"children" = (
+				9E61B777C9AD0070D661AA0A,
 				1EF68D214B8500C87BE2D7AF,
-				C2178C4A82BE59CE50DA254D,
 				ACF2F7FA92B96816CCF236A9,
 				21EE3DDBBA1117EBE2AEBBE2,
 			);
@@ -680,7 +696,7 @@
 		C0CC39B5A5B712F3D105BBDF = {
 			"isa" = PBXGroup;
 			"children" = (
-				EED137F69BBEFCE25FA6FC0E,
+				CD59D3D2EA359FE573C6562A,
 				AA48CC88DB1E4A3CC97B291E,
 				C6EC982AE96D2805878483BC,
 			);
@@ -693,6 +709,7 @@
 				34861D7FA116E98C139AC28D,
 				A75D18920D72265D232C0E31,
 				A86DE9F836D0A6D2DFDE9F0B,
+				D9EEE6E451A9B08A8F4AFB5A,
 				BAEA9E31871A92CFDAA2BD24,
 				E1687523ED70A15290B6F749,
 			);

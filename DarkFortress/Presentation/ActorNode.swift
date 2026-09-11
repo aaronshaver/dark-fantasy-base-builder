@@ -25,7 +25,7 @@ final class ActorNode: SKSpriteNode {
         let location = actor.position
         position = CGPoint(x: location.x * 32, y: location.y * 32)
         zPosition = 30 - CGFloat(location.y) * 0.01
-        let kind = actor.kind == .necromancer ? "necromancer" : "human"
+        let kind = actor.kind == .player ? "player" : "enemy_melee_sword"
         let action: String
         let frame: Int
         if let attack = actor.attack {

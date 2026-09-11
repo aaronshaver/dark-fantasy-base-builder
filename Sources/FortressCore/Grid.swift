@@ -9,7 +9,6 @@ struct Tile: Hashable, Codable, Comparable {
     static func - (lhs: Tile, rhs: Tile) -> Tile { Tile(x: lhs.x - rhs.x, y: lhs.y - rhs.y) }
     static func < (lhs: Tile, rhs: Tile) -> Bool { lhs.y == rhs.y ? lhs.x < rhs.x : lhs.y < rhs.y }
     var neighbors: [Tile] { Direction.allCases.map { self + $0.offset } }
-    var isInsideRoom: Bool { abs(x) < 3 && abs(y) < 3 }
     func distance(to other: Tile) -> Int { abs(x - other.x) + abs(y - other.y) }
 }
 

@@ -21,33 +21,30 @@ public struct ArtFrame {
 public enum ArtCatalog {
     public static let generatorVersion = 1
     public static let definitions: [ArtworkDefinition] = [
-        ArtworkDefinition(id: "grass", name: "Grass", parameters: [
+        ArtworkDefinition(id: "ground_grass", name: "Ground: Grass", parameters: [
             Parameter("tuftAdjustment", "Tuft count adjustment", value: 0, range: -4...8),
             Parameter("bladeHeight", "Blade height adjustment", value: 0, range: -1...2),
             Parameter("patchSize", "Patch size adjustment", value: 0, range: -2...2)
         ]),
-        ArtworkDefinition(id: "wood", name: "Wooden Floor", parameters: [
+        ArtworkDefinition(id: "floor_wood", name: "Floor: Wood", parameters: [
             Parameter("jointOffset", "Plank joint offset", value: 0, range: -3...3),
             Parameter("grainCount", "Grain lines per plank", value: 3, range: 1...6),
             Parameter("knotSize", "Knot size adjustment", value: 0, range: -1...2)
         ]),
-        ArtworkDefinition(id: "wall", name: "Stone Wall", parameters: [
+        ArtworkDefinition(id: "wall_stone", name: "Wall: Stone", parameters: [
             Parameter("jointOffset", "Stone joint offset", value: 0, range: -2...2),
             Parameter("pitCount", "Pits per stone", value: 3, range: 0...7)
         ]),
-        ArtworkDefinition(id: "gate", name: "Gate", parameters: [
+        ArtworkDefinition(id: "door_metal_gate", name: "Door: Metal Gate", parameters: [
             Parameter("barWidth", "Bar width", value: 2, range: 1...3),
             Parameter("lockWidth", "Lock width", value: 6, range: 4...8)
         ]),
-        ArtworkDefinition(id: "chair", name: "Chairs", parameters: [
+        ArtworkDefinition(id: "furniture_chair", name: "Furniture: Chair", parameters: [
             Parameter("backHeight", "Back height", value: 12, range: 10...14),
             Parameter("seatWidth", "Seat width", value: 19, range: 17...21)
         ]),
-        ArtworkDefinition(id: "necromancer", name: "Necromancer", parameters: characterParameters),
-        ArtworkDefinition(id: "human", name: "Human Soldier", parameters: characterParameters.filter { $0.id != "eyeColor" }),
-        ArtworkDefinition(id: "icons", name: "Interface Icons", parameters: [
-            Parameter("accent", "Accent color", value: "lilac", choices: ["lilac", "purple_light", "teal_light"])
-        ]),
+        ArtworkDefinition(id: "player", name: "Player", parameters: characterParameters),
+        ArtworkDefinition(id: "enemy_melee_sword", name: "Enemy: Melee: Sword", parameters: characterParameters.filter { $0.id != "eyeColor" }),
         ArtworkDefinition(id: "effects", name: "Effects and Markers", parameters: [
             Parameter("markerLength", "Marker corner length", value: 5, range: 3...7),
             Parameter("debrisLength", "Debris length adjustment", value: 0, range: -1...2)
@@ -67,13 +64,12 @@ public enum ArtCatalog {
         guard let definition = definitions.first(where: { $0.id == state.id }) else { throw ArtError.invalid("Unknown artwork: \(state.id)") }
         let parameters = try ParameterValues(schema: definition.parameters, overrides: state.parameters)
         switch state.id {
-        case "grass", "wood", "wall": return try GroundRecipes.frames(kind: state.id, parameters: parameters, seed: state.seed)
-        case "gate": return try PropRecipes.gates(parameters)
-        case "chair": return try PropRecipes.chairs(parameters)
-        case "necromancer", "human": return try CharacterRecipes.frames(kind: state.id, parameters: parameters)
-        case "icons": return try IconRecipes.frames(parameters)
+        case "ground_grass", "floor_wood", "wall_stone": return try GroundRecipes.frames(kind: state.id, parameters: parameters, seed: state.seed)
+        case "door_metal_gate": return try PropRecipes.metalGates(parameters)
+        case "furniture_chair": return try PropRecipes.chairs(parameters)
+        case "player", "enemy_melee_sword": return try CharacterRecipes.frames(kind: state.id, parameters: parameters)
         case "effects": return try EffectRecipes.frames(parameters)
-        case "appIcon": return [try IconRecipes.appIcon(parameters)]
+        case "appIcon": return [try AppIconRecipe.frame(parameters)]
         default: throw ArtError.invalid("Missing recipe")
         }
     }

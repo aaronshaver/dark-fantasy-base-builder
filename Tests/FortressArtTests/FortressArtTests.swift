@@ -12,12 +12,11 @@ final class FortressArtTests: XCTestCase {
 
     func testCatalogPreservesGameAssetNamesDimensionsAndPaletteContract() throws {
         var expected: Set<String> = ["AppIcon", "path_dot", "destination", "damage_flash"]
-        for kind in ["grass", "wood", "wall", "debris"] { for i in 0..<4 { expected.insert("\(kind)_\(i)") } }
-        for kind in ["gate", "chair"] { for i in 0..<3 { expected.insert("\(kind)_\(i)") } }
-        for icon in ["heart", "bone", "stone", "moon", "new", "build", "raise", "pause", "play"] { expected.insert("icon_\(icon)") }
-        for kind in ["human", "necromancer"] {
+        for kind in ["ground_grass", "floor_wood", "wall_stone", "debris"] { for i in 0..<4 { expected.insert("\(kind)_\(i)") } }
+        for kind in ["door_metal_gate", "furniture_chair"] { for i in 0..<3 { expected.insert("\(kind)_\(i)") } }
+        for kind in ["enemy_melee_sword", "player"] {
             for direction in ["north", "east", "south", "west"] {
-                for (action, count) in [("idle", 2), ("walk", 4)] + (kind == "human" ? [("attack", 3)] : []) {
+                for (action, count) in [("idle", 2), ("walk", 4)] + (kind == "enemy_melee_sword" ? [("attack", 3)] : []) {
                     for i in 0..<count { expected.insert("\(kind)_\(direction)_\(action)_\(i)") }
                 }
             }
@@ -31,13 +30,13 @@ final class FortressArtTests: XCTestCase {
                 XCTAssertTrue(canvas.pixels.allSatisfy { Int($0) < FortressPalette.shared.entries.count })
             }
         }
-        XCTAssertEqual(Set(names), expected); XCTAssertEqual(names.count, 95)
+        XCTAssertEqual(Set(names), expected); XCTAssertEqual(names.count, 86)
         XCTAssertLessThanOrEqual(FortressPalette.shared.entries.count, 256)
     }
 
     func testWallCornersStayTransparentAndOpaqueFloorsCoverTheirUnderlayer() throws {
-        let wall = ArtCatalog.definitions.first { $0.id == "wall" }!
-        let floors = ArtCatalog.definitions.filter { ["grass", "wood"].contains($0.id) }
+        let wall = ArtCatalog.definitions.first { $0.id == "wall_stone" }!
+        let floors = ArtCatalog.definitions.filter { ["ground_grass", "floor_wood"].contains($0.id) }
         var corners: Set<Int> = []
         for (x, y, dx, dy) in [(0, 0, 1, 1), (31, 0, -1, 1), (0, 31, 1, -1), (31, 31, -1, -1)] {
             corners.formUnion([y * 32 + x, y * 32 + x + dx, (y + dy) * 32 + x])
@@ -68,7 +67,7 @@ final class FortressArtTests: XCTestCase {
     }
 
     func testAppearanceParametersAreSharedAcrossAnimationFrames() throws {
-        for kind in ["human", "necromancer"] {
+        for kind in ["enemy_melee_sword", "player"] {
             let definition = ArtCatalog.definitions.first { $0.id == kind }!
             var state = definition.baseline; state.parameters["headWidth"] = .integer(13)
             let frames = try ArtCatalog.frames(for: state)
@@ -101,7 +100,7 @@ final class FortressArtTests: XCTestCase {
         XCTAssertThrowsError(try ArtExporter.generate(states: Array(states.dropLast())))
         states[1] = states[0]
         XCTAssertThrowsError(try ArtExporter.generate(states: states))
-        XCTAssertThrowsError(try ArtCatalog.frames(for: RecipeState(id: "grass", generatorVersion: -1, seed: 0, parameters: [:])))
+        XCTAssertThrowsError(try ArtCatalog.frames(for: RecipeState(id: "ground_grass", generatorVersion: -1, seed: 0, parameters: [:])))
         XCTAssertThrowsError(try ArtCatalog.frames(for: RecipeState(id: "unknown", generatorVersion: 1, seed: 0, parameters: [:])))
     }
 }

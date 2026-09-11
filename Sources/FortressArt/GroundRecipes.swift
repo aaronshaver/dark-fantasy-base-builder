@@ -5,14 +5,14 @@ enum GroundRecipes {
     static func frames(kind: String, parameters p: ParameterValues, seed: UInt64) throws -> [ArtFrame] {
         try (0..<4).map { variant in
             switch kind {
-            case "wood": return try wood(variant, p, seed)
-            case "wall": return try wall(variant, p, seed)
-            default: return try grass(variant, p, seed)
+            case "floor_wood": return try woodFloor(variant, p, seed)
+            case "wall_stone": return try stoneWall(variant, p, seed)
+            default: return try grassGround(variant, p, seed)
             }
         }
     }
 
-    private static func wood(_ v: Int, _ p: ParameterValues, _ seed: UInt64) throws -> ArtFrame {
+    private static func woodFloor(_ v: Int, _ p: ParameterValues, _ seed: UInt64) throws -> ArtFrame {
         let joints = [[21, 8, 27, 13], [6, 25, 12, 29], [14, 30, 5, 22], [28, 13, 23, 7]]
         let boards = [["wood", "wood_mid", "wood", "wood_mid"],
                       ["wood_mid", "wood_light", "wood", "wood_mid"],
@@ -57,10 +57,10 @@ enum GroundRecipes {
             splits.line(12, 18, 23, 18, "wood_glint")
         }
         children.append(splits.part("splits", z: 11))
-        return ArtFrame("wood_\(v)", children)
+        return ArtFrame("floor_wood_\(v)", children)
     }
 
-    private static func grass(_ v: Int, _ p: ParameterValues, _ seed: UInt64) throws -> ArtFrame {
+    private static func grassGround(_ v: Int, _ p: ParameterValues, _ seed: UInt64) throws -> ArtFrame {
         let patches: [[(Int, Int, Int, Int, String)]] = [
             [(9, 22, 7, 4, "grass_mid")],
             [(12, 12, 9, 6, "grass_mid"), (23, 24, 5, 3, "grass_light")],
@@ -107,12 +107,12 @@ enum GroundRecipes {
             for (x, y) in [(10, 19), (17, 22), (20, 17)] { d.line(x, y, x + 2, y, "moss") }
             children.append(d.part("moss", z: 4))
         }
-        return ArtFrame("grass_\(v)", children)
+        return ArtFrame("ground_grass_\(v)", children)
     }
 
     private static func pow2(_ x: Double) -> Double { x * x }
 
-    private static func wall(_ v: Int, _ p: ParameterValues, _ seed: UInt64) throws -> ArtFrame {
+    private static func stoneWall(_ v: Int, _ p: ParameterValues, _ seed: UInt64) throws -> ArtFrame {
         let courses: [[(Int, Int, [Int])]] = [
             [(0, 10, [-5, 13, 32]), (10, 20, [-1, 8, 25, 36]), (20, 30, [-7, 18, 36])],
             [(0, 15, [-2, 21, 35]), (15, 30, [-8, 10, 33])],
@@ -156,6 +156,6 @@ enum GroundRecipes {
             border.dot(x + dx, y + dy, "stone_dark")
         }
         children.append(border.part("roundedBorder", z: 100))
-        return ArtFrame("wall_\(v)", children)
+        return ArtFrame("wall_stone_\(v)", children)
     }
 }

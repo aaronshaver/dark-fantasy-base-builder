@@ -38,7 +38,7 @@ final class GameViewController: UIViewController {
             gameView.leadingAnchor.constraint(equalTo: view.leadingAnchor), gameView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
         ])
         configureOverlays()
-        configureDevButton()
+        configureAdminButton()
         configureVersionLabel()
         toolbar.onToggleZoom = { [weak self] in self?.toggleZoom() }
         toolbar.onTogglePause = { [weak self] in self?.togglePause() }
@@ -93,17 +93,15 @@ final class GameViewController: UIViewController {
         ])
     }
 
-    private func configureDevButton() {
+    private func configureAdminButton() {
         var configuration = UIButton.Configuration.filled()
-        configuration.title = "Dev"
-        configuration.image = UIImage(systemName: "ladybug")
-        configuration.imagePadding = 6
+        configuration.title = "Admin"
         configuration.baseBackgroundColor = .secondarySystemBackground
         configuration.baseForegroundColor = .label
         let button = UIButton(configuration: configuration, primaryAction: UIAction { [weak self] _ in
             guard let self else { return }
             self.pauseForInterruption()
-            let menu = DevViewController()
+            let menu = AdminViewController()
             menu.onNewGame = { [weak self] in self?.startNewGame() }
             menu.onArtworkSaved = { [weak self] pngs in
                 guard let self else { return }
@@ -113,7 +111,7 @@ final class GameViewController: UIViewController {
             self.present(UINavigationController(rootViewController: menu), animated: true)
         })
         button.alpha = 0.75
-        button.accessibilityIdentifier = "dev"
+        button.accessibilityIdentifier = "admin"
         button.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(button)
         NSLayoutConstraint.activate([
