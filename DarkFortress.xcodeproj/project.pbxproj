@@ -119,10 +119,28 @@
 			"path" = "DarkFortress/Presentation/PixelTextures.swift";
 			"sourceTree" = "SOURCE_ROOT";
 		};
+		008F972D2EC009FF41F5A5AD = {
+			"isa" = PBXFileReference;
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Tests/FortressCoreTests/CorpseTests.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
 		05E40DA17CFE3C880AB47A56 = {
 			"isa" = PBXFileReference;
 			"lastKnownFileType" = "sourcecode.swift";
 			"path" = "Tests/FortressCoreTests/FortressCoreTests.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		FFDE89DD5E0C1BC59175C9AD = {
+			"isa" = PBXFileReference;
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Tests/FortressCoreTests/SkeletonHomeTests.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		9641021D6D285B8FBCB1A3CA = {
+			"isa" = PBXFileReference;
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Tests/FortressCoreTests/SkeletonTests.swift";
 			"sourceTree" = "SOURCE_ROOT";
 		};
 		8A241E2E48637C3217539818 = {
@@ -460,9 +478,21 @@
 			"isa" = PBXBuildFile;
 			"fileRef" = E1687523ED70A15290B6F749;
 		};
+		E65CFE111CCAFB8F48CB26F2 = {
+			"isa" = PBXBuildFile;
+			"fileRef" = 008F972D2EC009FF41F5A5AD;
+		};
 		74873A097D968E09C1E7B1B4 = {
 			"isa" = PBXBuildFile;
 			"fileRef" = 05E40DA17CFE3C880AB47A56;
+		};
+		197C851CC12FCD75613F6D98 = {
+			"isa" = PBXBuildFile;
+			"fileRef" = FFDE89DD5E0C1BC59175C9AD;
+		};
+		4847740FC6CFF6B500D7FC9B = {
+			"isa" = PBXBuildFile;
+			"fileRef" = 9641021D6D285B8FBCB1A3CA;
 		};
 		654420764BA8A57BC3CB1B12 = {
 			"isa" = PBXSourcesBuildPhase;
@@ -474,7 +504,10 @@
 				E4504F0A009D5C7D2913701E,
 				9B3E77E66D787077638882DF,
 				DB7EC2F1FE97BC8B0E93B991,
+				E65CFE111CCAFB8F48CB26F2,
 				74873A097D968E09C1E7B1B4,
+				197C851CC12FCD75613F6D98,
+				4847740FC6CFF6B500D7FC9B,
 			);
 			"runOnlyForDeploymentPostprocessing" = 0;
 		};
@@ -736,7 +769,10 @@
 		156052F04525D0F710673CF0 = {
 			"isa" = PBXGroup;
 			"children" = (
+				008F972D2EC009FF41F5A5AD,
 				05E40DA17CFE3C880AB47A56,
+				FFDE89DD5E0C1BC59175C9AD,
+				9641021D6D285B8FBCB1A3CA,
 				8A241E2E48637C3217539818,
 			);
 			"name" = "Tests";

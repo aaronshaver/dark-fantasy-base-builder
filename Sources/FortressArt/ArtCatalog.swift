@@ -45,6 +45,7 @@ public enum ArtCatalog {
         ]),
         ArtworkDefinition(id: "player", name: "Player", parameters: characterParameters),
         ArtworkDefinition(id: "enemy_melee_sword", name: "Enemy: Melee: Sword", parameters: characterParameters.filter { $0.id != "eyeColor" }),
+        ArtworkDefinition(id: "ally_skeleton_melee", name: "Ally: Skeleton: Melee", parameters: characterParameters),
         ArtworkDefinition(id: "effects", name: "Effects and Markers", parameters: [
             Parameter("markerLength", "Marker corner length", value: 5, range: 3...7),
             Parameter("debrisLength", "Debris length adjustment", value: 0, range: -1...2)
@@ -68,6 +69,7 @@ public enum ArtCatalog {
         case "door_metal_gate": return try PropRecipes.metalGates(parameters)
         case "furniture_chair": return try PropRecipes.chairs(parameters)
         case "player", "enemy_melee_sword": return try CharacterRecipes.frames(kind: state.id, parameters: parameters)
+        case "ally_skeleton_melee": return try SkeletonRecipes.frames(parameters: parameters)
         case "effects": return try EffectRecipes.frames(parameters)
         case "appIcon": return [try AppIconRecipe.frame(parameters)]
         default: throw ArtError.invalid("Missing recipe")

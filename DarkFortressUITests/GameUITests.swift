@@ -61,6 +61,17 @@ final class GameUITests: XCTestCase {
         let frozenHealth = app.staticTexts["playerHealth"].label
         Thread.sleep(forTimeInterval: 2)
         XCTAssertEqual(app.staticTexts["playerHealth"].label, frozenHealth)
+        let zoom = app.buttons["zoomToggle"]
+        zoom.tap()
+        XCTAssertEqual(zoom.value as? String, "50%")
+        let homeShot = XCTAttachment(screenshot: app.screenshot())
+        homeShot.name = "Home and allied skeletons at 50 percent zoom"
+        homeShot.lifetime = .keepAlways
+        add(homeShot)
+        zoom.tap()
+        XCTAssertEqual(zoom.value as? String, "25%")
+        zoom.tap()
+        XCTAssertEqual(zoom.value as? String, "100%")
         let pausedShot = XCTAttachment(screenshot: app.screenshot())
         pausedShot.name = "Portrait world and play toggle"
         pausedShot.lifetime = .keepAlways

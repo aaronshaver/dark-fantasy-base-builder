@@ -105,12 +105,12 @@ final class FortressCoreTests: XCTestCase {
         XCTAssertNil(Pathfinder.path(from: world.playerStart, to: Tile(x: 100, y: 100), world: world, for: .friendly))
     }
 
-    func testRoomDefinitionCanBePlacedAtAnotherOriginAlongsideTheStarterRoom() throws {
+    func testRoomDefinitionCanBePlacedAtAnotherOriginAlongsideTheHomeRoom() throws {
         var random = SeededRandom(seed: 9)
-        let starter = Room(definition: .starter, interiorOrigin: Tile(x: -2, y: -2), random: &random)
+        let home = Room(definition: .home, interiorOrigin: Tile(x: -2, y: -2), random: &random)
         let workshop = RoomDefinition(id: "workshop", interiorWidth: 5, interiorHeight: 3, placesChairAwayFromEdge: true)
         let room = Room(definition: workshop, interiorOrigin: Tile(x: 6, y: 6), random: &random)
-        var world = World(seed: 1, rooms: [starter, room])
+        var world = World(seed: 1, rooms: [home, room])
         XCTAssertEqual(room.interiorTiles.count, 15)
         XCTAssertEqual(room.walls.count, 19)
         XCTAssertEqual(room.tiles.count, 35)
@@ -119,7 +119,7 @@ final class FortressCoreTests: XCTestCase {
         XCTAssertTrue(room.definition.canBeBuiltByPlayer)
         XCTAssertTrue(room.definition.canBeDestroyedByPlayer)
         XCTAssertNil(room.playerStart)
-        XCTAssertEqual(world.playerStart, starter.playerStart)
+        XCTAssertEqual(world.playerStart, home.playerStart)
         XCTAssertEqual(world.doors.count, 2)
         XCTAssertEqual(world.chairs.count, 2)
         for tile in room.floorTiles.keys {
@@ -129,8 +129,8 @@ final class FortressCoreTests: XCTestCase {
         XCTAssertTrue(room.walls.keys.allSatisfy { !world.isWalkable($0, for: .friendly) })
         world.damageDoor(at: room.door.tile, amount: room.door.health.hp, by: .hostile)
         XCTAssertTrue(world.isWalkable(room.door.tile, for: .hostile))
-        XCTAssertFalse(world.isWalkable(starter.door.tile, for: .hostile))
-        XCTAssertEqual(world.rooms[0].door.health.hp, starter.door.health.hp)
+        XCTAssertFalse(world.isWalkable(home.door.tile, for: .hostile))
+        XCTAssertEqual(world.rooms[0].door.health.hp, home.door.health.hp)
     }
 
     func testPlayerWalksAcrossIntactDoorWithoutChangingIt() throws {
@@ -163,7 +163,7 @@ final class FortressCoreTests: XCTestCase {
     }
 
     func testInvalidTapKeepsExistingRouteAndMovingTapReplansAtNextTile() throws {
-        let simulation = Simulation(seed: 10)
+        let simulation = unprotectedSimulation(seed: 10)
         let target = Tile(x: simulation.player.tile.x == -2 ? 1 : -2, y: simulation.player.tile.y)
         XCTAssertTrue(simulation.movePlayer(to: target))
         simulation.advance(by: 0.1)
@@ -274,7 +274,7 @@ final class FortressCoreTests: XCTestCase {
 
     func testEnemiesNeverOverlapAndEventuallyKillPlayerAcrossSeeds() {
         for seed in 0..<12 {
-            let simulation = Simulation(seed: UInt64(seed))
+            let simulation = unprotectedSimulation(seed: UInt64(seed))
             var sawGateTransit = false
             var sawPlayerDamage = false
             for _ in 0..<4200 {
@@ -326,7 +326,7 @@ final class FortressCoreTests: XCTestCase {
     }
 
     func testPlayerCannotAttackAndEnemiesAreFiftyPercentFaster() {
-        let simulation = Simulation(seed: 1)
+        let simulation = unprotectedSimulation(seed: 1)
         XCTAssertNil(simulation.player.attack)
         XCTAssertEqual(GameBalance.enemyTilesPerSecond / GameBalance.playerTilesPerSecond, 1.5, accuracy: 0.0001)
         for _ in 0..<2000 {
@@ -356,8 +356,8 @@ final class FortressCoreTests: XCTestCase {
         XCTAssertEqual(simulation.player.health.hp, 30)
         XCTAssertTrue(simulation.events.isEmpty)
         simulation.advance(by: GameBalance.simulationStep)
-        XCTAssertEqual(simulation.player.health.hp, 30 - GameBalance.playerDamage)
-        XCTAssertEqual(simulation.events, [.playerDamaged(30 - GameBalance.playerDamage)])
+        XCTAssertEqual(simulation.player.health.hp, 30 - GameBalance.enemyMeleeDamage)
+        XCTAssertEqual(simulation.events, [.playerDamaged(30 - GameBalance.enemyMeleeDamage)])
         XCTAssertEqual(simulation.enemies.first?.attack?.animationFrame, 1)
         XCTAssertTrue(simulation.movePlayer(to: Tile(x: 1, y: 1)))
         for _ in 0..<22 {
@@ -365,7 +365,7 @@ final class FortressCoreTests: XCTestCase {
             XCTAssertTrue(simulation.events.isEmpty, "Recovery must not emit a delayed hit")
         }
         XCTAssertNotNil(simulation.player.movement)
-        XCTAssertEqual(simulation.player.health.hp, 30 - GameBalance.playerDamage)
+        XCTAssertEqual(simulation.player.health.hp, 30 - GameBalance.enemyMeleeDamage)
         XCTAssertEqual(simulation.enemies.first?.tile, enemy.tile)
         XCTAssertNil(simulation.enemies.first?.movement)
     }
@@ -445,6 +445,11 @@ final class FortressCoreTests: XCTestCase {
         XCTAssertEqual(simulation.actors[1].attack?.animationFrame, 1)
         XCTAssertTrue(simulation.actors.allSatisfy { $0.movement == nil })
         XCTAssertTrue(simulation.actors.dropFirst(2).allSatisfy { $0.attack == nil })
+    }
+
+    private func unprotectedSimulation(seed: UInt64) -> Simulation {
+        let generated = Simulation(seed: seed)
+        return Simulation(world: generated.world, actors: generated.actors.filter { $0.kind != .allySkeletonMelee })
     }
 
     private func gateScenario(_ world: World) -> Simulation {

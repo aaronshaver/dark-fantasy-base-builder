@@ -44,7 +44,7 @@ core = [file(str(path.relative_to(ROOT))) for path in sorted((ROOT / 'Sources/Fo
 app = [file(str(path.relative_to(ROOT))) for path in sorted((ROOT / 'DarkFortress/App').glob('*.swift'))]
 development = [file(str(path.relative_to(ROOT))) for path in sorted((ROOT / 'DarkFortress/Development').glob('*.swift'))]
 presentation = [file(str(path.relative_to(ROOT))) for path in sorted((ROOT / 'DarkFortress/Presentation').glob('*.swift'))]
-unit = [file('Tests/FortressCoreTests/FortressCoreTests.swift')]
+unit = [file(str(path.relative_to(ROOT))) for path in sorted((ROOT / 'Tests/FortressCoreTests').glob('*.swift'))]
 ui = [file('DarkFortressUITests/GameUITests.swift')]
 resources = [file('DarkFortress/Resources/Pixel.atlas', 'folder.skatlas'),
              file('DarkFortress/Resources/Assets.xcassets', 'folder.assetcatalog'),

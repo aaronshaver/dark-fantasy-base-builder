@@ -79,6 +79,20 @@ final class GameScene: SKScene {
                 if !textures.hasTransparentPixels(layer.name) { break }
             }
         }
+        for room in world.rooms {
+            guard let name = room.definition.displayName else { continue }
+            let label = SKLabelNode(fontNamed: "Menlo-Bold")
+            label.text = name
+            label.fontSize = 24
+            label.fontColor = GamePalette.text
+            label.alpha = 0.75
+            label.horizontalAlignmentMode = .center
+            label.verticalAlignmentMode = .center
+            label.position = CGPoint(x: (Double(room.interiorOrigin.x) + Double(room.definition.interiorWidth - 1) / 2) * 32,
+                                     y: Double(room.interiorOrigin.y) * 32)
+            label.zPosition = 2
+            worldNode.addChild(label)
+        }
         for chair in world.chairs {
             _ = sprite("furniture_chair_\(chair.color)", at: chair.tile, z: 12)
         }
@@ -122,6 +136,13 @@ final class GameScene: SKScene {
             case .doorDamaged(let tile, _): flash(at: tile)
             case .doorDestroyed(let tile): destroyDoor(at: tile)
             case .playerDamaged: actorNodes[simulation.player.id]?.flashDamage()
+            case .actorDamaged(let id, _): actorNodes[id]?.flashDamage()
+            case .actorDied: break
+            case .actorDespawned(let id):
+                let node = actorNodes.removeValue(forKey: id)
+                node?.removeAllActions()
+                node?.removeAllChildren()
+                node?.removeFromParent()
             case .playerDied:
                 if !didShowDeath {
                     didShowDeath = true

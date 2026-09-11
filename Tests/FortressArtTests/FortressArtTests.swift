@@ -14,9 +14,9 @@ final class FortressArtTests: XCTestCase {
         var expected: Set<String> = ["AppIcon", "path_dot", "destination", "damage_flash"]
         for kind in ["ground_grass", "floor_wood", "wall_stone", "debris"] { for i in 0..<4 { expected.insert("\(kind)_\(i)") } }
         for kind in ["door_metal_gate", "furniture_chair"] { for i in 0..<3 { expected.insert("\(kind)_\(i)") } }
-        for kind in ["enemy_melee_sword", "player"] {
+        for kind in ["enemy_melee_sword", "player", "ally_skeleton_melee"] {
             for direction in ["north", "east", "south", "west"] {
-                for (action, count) in [("idle", 2), ("walk", 4)] + (kind == "enemy_melee_sword" ? [("attack", 3)] : []) {
+                for (action, count) in [("idle", 2), ("walk", 4)] + (kind != "player" ? [("attack", 3)] : []) {
                     for i in 0..<count { expected.insert("\(kind)_\(direction)_\(action)_\(i)") }
                 }
             }
@@ -30,7 +30,7 @@ final class FortressArtTests: XCTestCase {
                 XCTAssertTrue(canvas.pixels.allSatisfy { Int($0) < FortressPalette.shared.entries.count })
             }
         }
-        XCTAssertEqual(Set(names), expected); XCTAssertEqual(names.count, 86)
+        XCTAssertEqual(Set(names), expected); XCTAssertEqual(names.count, 122)
         XCTAssertLessThanOrEqual(FortressPalette.shared.entries.count, 256)
     }
 
@@ -67,7 +67,7 @@ final class FortressArtTests: XCTestCase {
     }
 
     func testAppearanceParametersAreSharedAcrossAnimationFrames() throws {
-        for kind in ["enemy_melee_sword", "player"] {
+        for kind in ["enemy_melee_sword", "player", "ally_skeleton_melee"] {
             let definition = ArtCatalog.definitions.first { $0.id == kind }!
             var state = definition.baseline; state.parameters["headWidth"] = .integer(13)
             let frames = try ArtCatalog.frames(for: state)
@@ -92,6 +92,26 @@ final class FortressArtTests: XCTestCase {
             let image = try XCTUnwrap(CGImageSourceCreateImageAtIndex(source, 0, nil))
             XCTAssertEqual(image.width, name == "AppIcon" ? 1024 : 32)
             XCTAssertEqual(image.height, image.width)
+        }
+    }
+
+    func testSkeletonHandsAndBonesStayInsideTilesAtEveryProportion() throws {
+        let definition = ArtCatalog.definitions.first { $0.id == "ally_skeleton_melee" }!
+        for headWidth in 9...13 {
+            for bodyWidth in -1...1 {
+                var state = definition.baseline
+                state.parameters["headWidth"] = .integer(headWidth)
+                state.parameters["bodyWidth"] = .integer(bodyWidth)
+                for frame in try ArtCatalog.frames(for: state) {
+                    XCTAssertFalse(frame.root.children.contains { $0.id == "weapon" })
+                    var root = frame.root
+                    root.placement = Placement(32, 32)
+                    let canvas = try renderer.render(root, width: 96, height: 96)
+                    for y in 0..<96 { for x in 0..<96 where !(32..<64).contains(x) || !(32..<64).contains(y) {
+                        XCTAssertEqual(canvas[x, y], 0, "Clipped part in \(frame.name), head \(headWidth), body \(bodyWidth)")
+                    } }
+                }
+            }
         }
     }
 

@@ -1,6 +1,6 @@
 import Foundation
 
-/// Shared access category: future allies use the same affiliation as the player.
+/// Shared access category: allies use the same affiliation as the player.
 enum Affiliation: Hashable { case friendly, hostile }
 
 struct Door {
@@ -36,6 +36,7 @@ struct RoomDefinition {
     let id: String
     let interiorWidth: Int
     let interiorHeight: Int
+    var displayName: String? = nil
     var floor: Terrain = .wood
     var wallHP: Int = 500
     var doorHP: Int = GameBalance.gateHP
@@ -45,7 +46,7 @@ struct RoomDefinition {
     var canBeDestroyedByPlayer = true
     var canBeBuiltByPlayer = true
 
-    static let starter = RoomDefinition(id: "starter", interiorWidth: 4, interiorHeight: 4,
+    static let home = RoomDefinition(id: "home", interiorWidth: 4, interiorHeight: 4, displayName: "Home",
                                        placesChairAwayFromEdge: true, spawnsPlayer: true,
                                        canBeDestroyedByPlayer: false, canBeBuiltByPlayer: false)
 }

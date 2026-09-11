@@ -33,6 +33,7 @@ struct World {
     private let roomIndices: [Tile: Int]
     let playerStart: Tile
     let enemyStarts: [Tile]
+    let allyStarts: [Tile]
 
     var doors: [Door] { rooms.map(\.door) }
     var walls: [Tile: Wall] { rooms.reduce(into: [:]) { $0.merge($1.walls) { current, _ in current } } }
@@ -62,7 +63,7 @@ struct World {
     init(seed: UInt64, rooms suppliedRooms: [Room]? = nil) {
         self.seed = seed
         var random = SeededRandom(seed: seed)
-        rooms = suppliedRooms ?? [Room(definition: .starter, interiorOrigin: Tile(x: -2, y: -2), random: &random)]
+        rooms = suppliedRooms ?? [Room(definition: .home, interiorOrigin: Tile(x: -2, y: -2), random: &random)]
         let playerStarts = rooms.compactMap(\.playerStart)
         precondition(playerStarts.count == 1, "The world must contain exactly one player spawn")
         playerStart = playerStarts[0]
@@ -84,15 +85,29 @@ struct World {
         ground = tiles
         let edge = tiles.keys.filter { max(abs($0.x), abs($0.y)) == Self.radius && indices[$0] == nil }.sorted()
         enemyStarts = Array(edge.shuffled(using: &random).prefix(GameBalance.enemyCount))
+        let home = rooms.first { $0.playerStart != nil }!
+        let occupied = Set([playerStart] + home.chairs.map(\.tile) + enemyStarts)
+        let interior = home.interiorTiles.subtracting(occupied).sorted()
+        let exterior = Set(home.walls.keys.flatMap(\.neighbors)).subtracting(home.tiles).subtracting(occupied)
+            .filter { tiles[$0] != nil && indices[$0] == nil }.sorted()
+        allyStarts = Array(interior.shuffled(using: &random).prefix(1))
+            + Array(exterior.shuffled(using: &random).prefix(GameBalance.exteriorSkeletonCount))
     }
 }
 
 enum GameBalance {
     static let enemyCount = 3
     static let playerHP = 30
+    static let enemyHP = 20
+    static let skeletonHP = enemyHP
+    static let exteriorSkeletonCount = 4
     static let gateHP = 45
     static let playerTilesPerSecond = 2.0
     static let enemyTilesPerSecond = playerTilesPerSecond * 1.5
+    static let skeletonTilesPerSecond = enemyTilesPerSecond
+    static let skeletonSenseRadius = 13
+    static let skeletonWanderRadius = 2
+    static let skeletonIdleInterval = 1...5
     static let attackInterval = 1.0
     static let attackWindup = 1.0 / 3.0
     static let meleeAttackWindup = 0.20
@@ -100,6 +115,9 @@ enum GameBalance {
     static let swordReach = 1.5
     static let attackContactDuration = 0.15
     static let gateDamage = 3  // Three attackers × 3 damage × 5 volleys = 45 HP.
-    static let playerDamage = 4
+    static let enemyMeleeDamage = 4
+    static let skeletonDamage = enemyMeleeDamage
+    static let corpseLifetime = 5.0
+    static let corpseFadeDuration = 0.5
     static let simulationStep = 1.0 / 60.0
 }

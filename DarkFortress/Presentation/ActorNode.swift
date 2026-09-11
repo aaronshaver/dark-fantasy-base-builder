@@ -25,24 +25,19 @@ final class ActorNode: SKSpriteNode {
         let location = actor.position
         position = CGPoint(x: location.x * 32, y: location.y * 32)
         zPosition = 30 - CGFloat(location.y) * 0.01
-        let kind = actor.kind == .player ? "player" : "enemy_melee_sword"
-        let action: String
-        let frame: Int
-        if let attack = actor.attack {
-            action = "attack"
-            frame = attack.animationFrame
-        } else if actor.movement != nil {
-            action = "walk"
-            frame = Int(time / 0.18) % 4
-        } else {
-            action = "idle"
-            frame = Int((time + Double(actor.id) * 0.2) / 0.7) % 2
+        let kind: String
+        switch actor.kind {
+        case .player: kind = "player"
+        case .enemyMeleeSword: kind = "enemy_melee_sword"
+        case .allySkeletonMelee: kind = "ally_skeleton_melee"
         }
-        let next = "\(kind)_\(actor.facing.rawValue)_\(action)_\(frame)"
+        let animation = actor.animation(at: time)
+        let next = "\(kind)_\(actor.facing.rawValue)_\(animation.action)_\(animation.frame)"
         if next != frameName {
             texture = textures.texture(next)
             frameName = next
         }
-        if !actor.isAlive { zRotation = .pi / 2 }
+        zRotation = actor.isAlive ? 0 : .pi / 2
+        alpha = CGFloat(actor.corpse?.opacity ?? 1)
     }
 }

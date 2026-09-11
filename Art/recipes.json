@@ -135,6 +135,28 @@
   },
   {
     "generatorVersion" : 1,
+    "id" : "ally_skeleton_melee",
+    "parameters" : {
+      "bodyWidth" : {
+        "integer" : {
+          "_0" : -1
+        }
+      },
+      "eyeColor" : {
+        "choice" : {
+          "_0" : "teal_light"
+        }
+      },
+      "headWidth" : {
+        "integer" : {
+          "_0" : 11
+        }
+      }
+    },
+    "seed" : 170
+  },
+  {
+    "generatorVersion" : 1,
     "id" : "effects",
     "parameters" : {
       "debrisLength" : {
