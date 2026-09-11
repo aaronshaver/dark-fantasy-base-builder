@@ -39,6 +39,7 @@ final class GameViewController: UIViewController {
         ])
         configureOverlays()
         configureDevButton()
+        configureVersionLabel()
         toolbar.onToggleZoom = { [weak self] in self?.toggleZoom() }
         toolbar.onTogglePause = { [weak self] in self?.togglePause() }
         textures.preload { [weak self] in
@@ -76,6 +77,22 @@ final class GameViewController: UIViewController {
         ])
     }
 
+    private func configureVersionLabel() {
+        let version = UILabel()
+        version.text = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
+        version.font = .monospacedDigitSystemFont(ofSize: 11, weight: .regular)
+        version.textColor = GamePalette.text
+        version.alpha = 0.75
+        version.isUserInteractionEnabled = false
+        version.accessibilityIdentifier = "appVersion"
+        version.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(version)
+        NSLayoutConstraint.activate([
+            version.topAnchor.constraint(equalTo: gameView.topAnchor, constant: 8),
+            version.leadingAnchor.constraint(equalTo: gameView.leadingAnchor, constant: 8)
+        ])
+    }
+
     private func configureDevButton() {
         var configuration = UIButton.Configuration.filled()
         configuration.title = "Dev"
@@ -88,6 +105,11 @@ final class GameViewController: UIViewController {
             self.pauseForInterruption()
             let menu = DevViewController()
             menu.onNewGame = { [weak self] in self?.startNewGame() }
+            menu.onArtworkSaved = { [weak self] pngs in
+                guard let self else { return }
+                try self.textures.replace(pngs)
+                self.gameScene?.reloadTextures()
+            }
             self.present(UINavigationController(rootViewController: menu), animated: true)
         })
         button.alpha = 0.75

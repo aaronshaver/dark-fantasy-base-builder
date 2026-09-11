@@ -2,6 +2,7 @@ import UIKit
 
 final class DevViewController: UITableViewController {
     var onNewGame: (() -> Void)?
+    var onArtworkSaved: (([String: Data]) throws -> Void)?
 
     init() { super.init(style: .insetGrouped) }
     required init?(coder: NSCoder) { fatalError("Programmatic dev menu") }
@@ -30,15 +31,9 @@ final class DevViewController: UITableViewController {
             let start = onNewGame
             dismiss(animated: true) { start?() }
         } else {
-            navigationController?.pushViewController(ArtVariationsViewController(), animated: true)
+            let artwork = ArtVariationsViewController()
+            artwork.onArtworkSaved = onArtworkSaved
+            navigationController?.pushViewController(artwork, animated: true)
         }
-    }
-}
-
-final class ArtVariationsViewController: UIViewController {
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        title = "Art Variations"
-        view.backgroundColor = .systemGroupedBackground
     }
 }

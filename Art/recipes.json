@@ -1,0 +1,177 @@
+[
+  {
+    "generatorVersion" : 1,
+    "id" : "grass",
+    "parameters" : {
+      "bladeHeight" : {
+        "integer" : {
+          "_0" : 0
+        }
+      },
+      "patchSize" : {
+        "integer" : {
+          "_0" : 0
+        }
+      },
+      "tuftAdjustment" : {
+        "integer" : {
+          "_0" : 0
+        }
+      }
+    },
+    "seed" : 170
+  },
+  {
+    "generatorVersion" : 1,
+    "id" : "wood",
+    "parameters" : {
+      "grainCount" : {
+        "integer" : {
+          "_0" : 1
+        }
+      },
+      "jointOffset" : {
+        "integer" : {
+          "_0" : 3
+        }
+      },
+      "knotSize" : {
+        "integer" : {
+          "_0" : 1
+        }
+      }
+    },
+    "seed" : 170
+  },
+  {
+    "generatorVersion" : 1,
+    "id" : "wall",
+    "parameters" : {
+      "jointOffset" : {
+        "integer" : {
+          "_0" : 0
+        }
+      },
+      "pitCount" : {
+        "integer" : {
+          "_0" : 3
+        }
+      }
+    },
+    "seed" : 170
+  },
+  {
+    "generatorVersion" : 1,
+    "id" : "gate",
+    "parameters" : {
+      "barWidth" : {
+        "integer" : {
+          "_0" : 2
+        }
+      },
+      "lockWidth" : {
+        "integer" : {
+          "_0" : 6
+        }
+      }
+    },
+    "seed" : 170
+  },
+  {
+    "generatorVersion" : 1,
+    "id" : "chair",
+    "parameters" : {
+      "backHeight" : {
+        "integer" : {
+          "_0" : 12
+        }
+      },
+      "seatWidth" : {
+        "integer" : {
+          "_0" : 19
+        }
+      }
+    },
+    "seed" : 170
+  },
+  {
+    "generatorVersion" : 1,
+    "id" : "necromancer",
+    "parameters" : {
+      "bodyWidth" : {
+        "integer" : {
+          "_0" : 1
+        }
+      },
+      "eyeColor" : {
+        "choice" : {
+          "_0" : "lilac"
+        }
+      },
+      "headWidth" : {
+        "integer" : {
+          "_0" : 10
+        }
+      }
+    },
+    "seed" : 170
+  },
+  {
+    "generatorVersion" : 1,
+    "id" : "human",
+    "parameters" : {
+      "bodyWidth" : {
+        "integer" : {
+          "_0" : 0
+        }
+      },
+      "headWidth" : {
+        "integer" : {
+          "_0" : 11
+        }
+      }
+    },
+    "seed" : 170
+  },
+  {
+    "generatorVersion" : 1,
+    "id" : "icons",
+    "parameters" : {
+      "accent" : {
+        "choice" : {
+          "_0" : "lilac"
+        }
+      }
+    },
+    "seed" : 170
+  },
+  {
+    "generatorVersion" : 1,
+    "id" : "effects",
+    "parameters" : {
+      "debrisLength" : {
+        "integer" : {
+          "_0" : 0
+        }
+      },
+      "markerLength" : {
+        "integer" : {
+          "_0" : 5
+        }
+      }
+    },
+    "seed" : 170
+  },
+  {
+    "generatorVersion" : 1,
+    "id" : "appIcon",
+    "parameters" : {
+      "towerHeight" : {
+        "integer" : {
+          "_0" : 8
+        }
+      }
+    },
+    "seed" : 170
+  }
+]

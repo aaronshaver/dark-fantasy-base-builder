@@ -59,6 +59,24 @@
 			"path" = "DarkFortress/App/SceneDelegate.swift";
 			"sourceTree" = "SOURCE_ROOT";
 		};
+		EED137F69BBEFCE25FA6FC0E = {
+			"isa" = PBXFileReference;
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "DarkFortress/Development/ArtVariationsViewController.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		AA48CC88DB1E4A3CC97B291E = {
+			"isa" = PBXFileReference;
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "DarkFortress/Development/ArtworkGridView.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		C6EC982AE96D2805878483BC = {
+			"isa" = PBXFileReference;
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "DarkFortress/Development/ArtworkRepository.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
 		AD3B8A05450E5075E5FA8044 = {
 			"isa" = PBXFileReference;
 			"lastKnownFileType" = "sourcecode.swift";
@@ -124,6 +142,19 @@
 			"lastKnownFileType" = "text.json";
 			"path" = "DarkFortress/Resources/palette.json";
 			"sourceTree" = "SOURCE_ROOT";
+		};
+		6E4D73D8F50AAE34649E13FE = {
+			"isa" = XCLocalSwiftPackageReference;
+			"relativePath" = ".";
+		};
+		79FDD98E6C444EFD88C4BCC0 = {
+			"isa" = XCSwiftPackageProductDependency;
+			"package" = 6E4D73D8F50AAE34649E13FE;
+			"productName" = "FortressArt";
+		};
+		A384DA07C6DEAD578D70E60D = {
+			"isa" = PBXBuildFile;
+			"productRef" = 79FDD98E6C444EFD88C4BCC0;
 		};
 		877A6BA951A2EA0025A2ABE8 = {
 			"isa" = XCBuildConfiguration;
@@ -253,6 +284,18 @@
 			"isa" = PBXBuildFile;
 			"fileRef" = B1B6D9C042F5696AAE966878;
 		};
+		DF7986A3B5C29B7766748D8F = {
+			"isa" = PBXBuildFile;
+			"fileRef" = EED137F69BBEFCE25FA6FC0E;
+		};
+		5E7FB00F92023BB89C2EAAE6 = {
+			"isa" = PBXBuildFile;
+			"fileRef" = AA48CC88DB1E4A3CC97B291E;
+		};
+		6FB4E54C195E3CE29537BD9E = {
+			"isa" = PBXBuildFile;
+			"fileRef" = C6EC982AE96D2805878483BC;
+		};
 		33309D8394C248A3440EEBC3 = {
 			"isa" = PBXBuildFile;
 			"fileRef" = 098586FBB1710A2E1695B801;
@@ -284,6 +327,9 @@
 				F4AFF4292633A5AA0A2A4FEF,
 				FE443AED3989FA2909108FB9,
 				14697F912CA11FAE7C08A608,
+				DF7986A3B5C29B7766748D8F,
+				5E7FB00F92023BB89C2EAAE6,
+				6FB4E54C195E3CE29537BD9E,
 			);
 			"runOnlyForDeploymentPostprocessing" = 0;
 		};
@@ -291,6 +337,7 @@
 			"isa" = PBXFrameworksBuildPhase;
 			"buildActionMask" = 2147483647;
 			"files" = (
+				A384DA07C6DEAD578D70E60D,
 			);
 			"runOnlyForDeploymentPostprocessing" = 0;
 		};
@@ -318,6 +365,8 @@
 				"ASSETCATALOG_COMPILER_APPICON_NAME" = "AppIcon";
 				"ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME" = "";
 				"GENERATE_INFOPLIST_FILE" = "NO";
+				"MARKETING_VERSION" = "0.1.0";
+				"CURRENT_PROJECT_VERSION" = "1";
 			};
 			"name" = "Debug";
 		};
@@ -335,6 +384,8 @@
 				"ASSETCATALOG_COMPILER_APPICON_NAME" = "AppIcon";
 				"ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME" = "";
 				"GENERATE_INFOPLIST_FILE" = "NO";
+				"MARKETING_VERSION" = "0.1.0";
+				"CURRENT_PROJECT_VERSION" = "1";
 			};
 			"name" = "Release";
 		};
@@ -363,6 +414,9 @@
 			"productName" = "DarkFortress";
 			"productReference" = 6DA04CA0BF826FDBC9DBF9DF;
 			"productType" = "com.apple.product-type.application";
+			"packageProductDependencies" = (
+				79FDD98E6C444EFD88C4BCC0,
+			);
 		};
 		71D7F1135FB3461AA4F73861 = {
 			"isa" = PBXFileReference;
@@ -492,6 +546,8 @@
 			"productName" = "FortressCoreTests";
 			"productReference" = 71D7F1135FB3461AA4F73861;
 			"productType" = "com.apple.product-type.bundle.unit-test";
+			"packageProductDependencies" = (
+			);
 		};
 		B7E3D714D8AA04A3566C586E = {
 			"isa" = PBXFileReference;
@@ -594,6 +650,8 @@
 			"productName" = "DarkFortressUITests";
 			"productReference" = B7E3D714D8AA04A3566C586E;
 			"productType" = "com.apple.product-type.bundle.ui-testing";
+			"packageProductDependencies" = (
+			);
 		};
 		1C48CE29E4E135EE62951B22 = {
 			"isa" = PBXGroup;
@@ -617,6 +675,16 @@
 				B1B6D9C042F5696AAE966878,
 			);
 			"name" = "Presentation";
+			"sourceTree" = "<group>";
+		};
+		C0CC39B5A5B712F3D105BBDF = {
+			"isa" = PBXGroup;
+			"children" = (
+				EED137F69BBEFCE25FA6FC0E,
+				AA48CC88DB1E4A3CC97B291E,
+				C6EC982AE96D2805878483BC,
+			);
+			"name" = "Development";
 			"sourceTree" = "<group>";
 		};
 		A6D28BB20DF74CA8575431D1 = {
@@ -693,6 +761,7 @@
 			"children" = (
 				1C48CE29E4E135EE62951B22,
 				BEE5558D0BB552A58936C015,
+				C0CC39B5A5B712F3D105BBDF,
 				A6D28BB20DF74CA8575431D1,
 				A024F06580C79B7582C3806A,
 				156052F04525D0F710673CF0,
@@ -728,6 +797,9 @@
 			"knownRegions" = (
 				"en",
 				"Base",
+			);
+			"packageReferences" = (
+				6E4D73D8F50AAE34649E13FE,
 			);
 			"mainGroup" = 44DFDB44171A57B2ED6C62D8;
 			"productRefGroup" = 5151B46607EBC8890D8DFCC2;

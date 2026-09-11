@@ -23,6 +23,23 @@ final class PixelTextures {
         atlas.preload(completionHandler: completion)
     }
 
+    /// Accept ready-to-use images without knowing which tool authored them.
+    func replace(_ pngs: [String: Data]) throws {
+        var replacements: [String: SKTexture] = [:]
+        for (name, data) in pngs where cache[name] != nil {
+            guard let image = UIImage(data: data)?.cgImage, image.width == 32, image.height == 32 else {
+                throw NSError(domain: "PixelTextures", code: 1, userInfo: [NSLocalizedDescriptionKey: "Invalid sprite: \(name)"])
+            }
+            let texture = SKTexture(cgImage: image)
+            texture.filteringMode = .nearest
+            replacements[name] = texture
+        }
+        for (name, texture) in replacements {
+            cache[name] = texture
+            transparency.removeValue(forKey: name)
+        }
+    }
+
     func hasTransparentPixels(_ name: String) -> Bool {
         if let result = transparency[name] { return result }
         let image = texture(name).cgImage()

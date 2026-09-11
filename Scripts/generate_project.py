@@ -42,6 +42,7 @@ def file(path, kind='sourcecode.swift'):
 
 core = [file(str(path.relative_to(ROOT))) for path in sorted((ROOT / 'Sources/FortressCore').glob('*.swift'))]
 app = [file(str(path.relative_to(ROOT))) for path in sorted((ROOT / 'DarkFortress/App').glob('*.swift'))]
+development = [file(str(path.relative_to(ROOT))) for path in sorted((ROOT / 'DarkFortress/Development').glob('*.swift'))]
 presentation = [file(str(path.relative_to(ROOT))) for path in sorted((ROOT / 'DarkFortress/Presentation').glob('*.swift'))]
 unit = [file('Tests/FortressCoreTests/FortressCoreTests.swift')]
 ui = [file('DarkFortressUITests/GameUITests.swift')]
@@ -53,6 +54,10 @@ resources = [file('DarkFortress/Resources/Pixel.atlas', 'folder.skatlas'),
 def group(name, children):
     return add('group:' + name, 'PBXGroup', children=children, name=name, sourceTree='<group>')
 
+
+art_package = add('package:art', 'XCLocalSwiftPackageReference', relativePath='.')
+art_product = add('package-product:art', 'XCSwiftPackageProductDependency', package=art_package, productName='FortressArt')
+art_link = add('package-link:art', 'PBXBuildFile', productRef=art_product)
 
 products = []
 targets = []
@@ -84,7 +89,7 @@ project_config = configs('project', {
 
 
 for name, sources, extension, product_type in [
-    ('DarkFortress', core + app + presentation, 'app', 'application'),
+    ('DarkFortress', core + app + presentation + development, 'app', 'application'),
     ('FortressCoreTests', core + unit, 'xctest', 'bundle.unit-test'),
     ('DarkFortressUITests', ui, 'xctest', 'bundle.ui-testing')
 ]:
@@ -94,14 +99,15 @@ for name, sources, extension, product_type in [
     source_builds = [add(f'build:{name}:{ref}', 'PBXBuildFile', fileRef=ref) for ref in sources]
     resource_builds = [add(f'resource:{name}:{ref}', 'PBXBuildFile', fileRef=ref) for ref in resources] if extension == 'app' else []
     phases = [add('sources:' + name, 'PBXSourcesBuildPhase', buildActionMask=2147483647, files=source_builds, runOnlyForDeploymentPostprocessing=0),
-              add('frameworks:' + name, 'PBXFrameworksBuildPhase', buildActionMask=2147483647, files=[], runOnlyForDeploymentPostprocessing=0),
+              add('frameworks:' + name, 'PBXFrameworksBuildPhase', buildActionMask=2147483647, files=[art_link] if extension == 'app' else [], runOnlyForDeploymentPostprocessing=0),
               add('resources:' + name, 'PBXResourcesBuildPhase', buildActionMask=2147483647, files=resource_builds, runOnlyForDeploymentPostprocessing=0)]
     settings = {'PRODUCT_NAME': '$(TARGET_NAME)', 'PRODUCT_BUNDLE_IDENTIFIER': 'com.aaronshaver.darkfortress' + ('.' + name if extension != 'app' else ''),
                 'CODE_SIGN_STYLE': 'Automatic', 'LD_RUNPATH_SEARCH_PATHS': ['$(inherited)', '@executable_path/Frameworks']}
     dependencies = []
     if extension == 'app':
         settings.update(INFOPLIST_FILE='DarkFortress/Info.plist', ASSETCATALOG_COMPILER_APPICON_NAME='AppIcon',
-                        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME='', GENERATE_INFOPLIST_FILE='NO')
+                        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME='', GENERATE_INFOPLIST_FILE='NO',
+                        MARKETING_VERSION='0.1.0', CURRENT_PROJECT_VERSION='1')
     else:
         settings.update(GENERATE_INFOPLIST_FILE='YES')
         proxy = add('proxy:' + name, 'PBXContainerItemProxy', containerPortal=identity('project'), proxyType=1,
@@ -113,9 +119,10 @@ for name, sources, extension, product_type in [
             settings.update(TEST_TARGET_NAME='DarkFortress')
     targets.append(add('target:' + name, 'PBXNativeTarget', buildConfigurationList=configs(name, settings), buildPhases=phases,
                        buildRules=[], dependencies=dependencies, name=name, productName=name, productReference=product,
-                       productType='com.apple.product-type.' + product_type))
+                       productType='com.apple.product-type.' + product_type,
+                       packageProductDependencies=[art_product] if extension == 'app' else []))
 
-main = group('Dark Fortress', [group('App', app), group('Presentation', presentation), group('Fortress Core', core),
+main = group('Dark Fortress', [group('App', app), group('Presentation', presentation), group('Development', development), group('Fortress Core', core),
                              group('Resources', resources + [file('DarkFortress/Info.plist', 'text.plist.xml')]),
                              group('Tests', unit + ui), group('Principles', [file('project_principles.md', 'net.daringfireball.markdown'),
                                                                          file('game_principles.md', 'net.daringfireball.markdown')]),
@@ -124,7 +131,7 @@ project_id = add('project', 'PBXProject', attributes={'BuildIndependentTargetsIn
     'TargetAttributes': {target_ids[0]: {'CreatedOnToolsVersion': '26.0'}, target_ids[1]: {'CreatedOnToolsVersion': '26.0', 'TestTargetID': target_ids[0]},
                          target_ids[2]: {'CreatedOnToolsVersion': '26.0', 'TestTargetID': target_ids[0]}}},
     buildConfigurationList=project_config, compatibilityVersion='Xcode 14.0', developmentRegion='en', hasScannedForEncodings=0,
-    knownRegions=['en', 'Base'], mainGroup=main, productRefGroup=identity('group:Products'), projectDirPath='', projectRoot='', targets=targets)
+    knownRegions=['en', 'Base'], packageReferences=[art_package], mainGroup=main, productRefGroup=identity('group:Products'), projectDirPath='', projectRoot='', targets=targets)
 PROJECT.mkdir(exist_ok=True)
 (PROJECT / 'project.pbxproj').write_text('// !$*UTF8*$!\n' + encode({'archiveVersion': 1, 'classes': {}, 'objectVersion': 56,
                                                                'objects': objects, 'rootObject': project_id}) + '\n')

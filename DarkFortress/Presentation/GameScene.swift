@@ -5,7 +5,7 @@ final class GameScene: SKScene {
     private let textures: PixelTextures
     private let worldNode = SKNode()
     private let followCamera = SKCameraNode()
-    private let pathOverlay: PathOverlay
+    private var pathOverlay: PathOverlay
     private var actorNodes: [Int: ActorNode] = [:]
     private var gateNode = SKSpriteNode()
     private var gateGroundNodes: [SKSpriteNode] = []
@@ -79,8 +79,10 @@ final class GameScene: SKScene {
             }
         }
         _ = sprite("chair_\(world.chair.color)", at: world.chair.tile, z: 12)
-        gateNode = sprite("gate_0", at: world.gateTile, z: 10)
-        if world.gateDirection == .east || world.gateDirection == .west { gateNode.zRotation = .pi / 2 }
+        if !world.gate.isDestroyed {
+            gateNode = sprite("gate_0", at: world.gateTile, z: 10)
+            if world.gateDirection == .east || world.gateDirection == .west { gateNode.zRotation = .pi / 2 }
+        }
         worldNode.addChild(pathOverlay)
         for actor in simulation.actors {
             let node = ActorNode(textures: textures)
@@ -93,6 +95,17 @@ final class GameScene: SKScene {
         simulation.isPaused = paused
         worldNode.isPaused = paused
         lastUpdate = nil
+    }
+
+    /// Rebuild presentation after an asset replacement, preserving simulation, camera, zoom, and pause state.
+    func reloadTextures() {
+        worldNode.removeAllChildren()
+        actorNodes.removeAll()
+        gateGroundNodes.removeAll()
+        gateStage = -1
+        pathOverlay = PathOverlay(textures: textures)
+        buildWorld()
+        synchronize()
     }
 
     override func update(_ currentTime: TimeInterval) {
