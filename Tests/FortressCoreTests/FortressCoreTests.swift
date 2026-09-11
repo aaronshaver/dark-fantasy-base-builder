@@ -162,15 +162,15 @@ final class FortressCoreTests: XCTestCase {
         XCTAssertEqual(simulation.world.door(at: door.tile)?.health.hp, door.health.hp)
     }
 
-    func testInvalidTapKeepsExistingRouteAndMovingTapReplansAtNextTile() throws {
+    func testInvalidTapCancelsExistingRouteAndMovingTapReplansAtNextTile() throws {
         let simulation = unprotectedSimulation(seed: 10)
         let target = Tile(x: simulation.player.tile.x == -2 ? 1 : -2, y: simulation.player.tile.y)
         XCTAssertTrue(simulation.movePlayer(to: target))
         simulation.advance(by: 0.1)
         let movement = try XCTUnwrap(simulation.player.movement)
-        let route = simulation.player.route
         XCTAssertFalse(simulation.movePlayer(to: simulation.world.walls.keys.sorted()[0]))
-        XCTAssertEqual(simulation.player.route, route)
+        XCTAssertTrue(simulation.player.route.isEmpty)
+        XCTAssertNil(simulation.player.destination)
         XCTAssertEqual(simulation.player.movement?.to, movement.to)
         let newTarget = simulation.world.rooms[0].chairs[0].tile
         XCTAssertTrue(simulation.movePlayer(to: newTarget))
@@ -274,7 +274,16 @@ final class FortressCoreTests: XCTestCase {
 
     func testEnemiesNeverOverlapAndEventuallyKillPlayerAcrossSeeds() {
         for seed in 0..<12 {
-            let simulation = unprotectedSimulation(seed: UInt64(seed))
+            let world = World(seed: UInt64(seed))
+            // Keep the door nearer than the player under the new nearest-destructible rule.
+            let door = world.doors[0], normal = door.outwardDirection.offset
+            let player = Actor(id: 0, kind: .player, tile: door.tile - normal,
+                               health: Destructible(maximumHP: 30, hp: 30))
+            let enemies = door.exteriorAttackTiles.enumerated().map {
+                Actor(id: $0.offset + 1, kind: .enemyMeleeSword, tile: $0.element,
+                      health: Destructible(maximumHP: 20, hp: 20))
+            }
+            let simulation = Simulation(world: world, actors: [player] + enemies)
             var sawGateTransit = false
             var sawPlayerDamage = false
             for _ in 0..<4200 {

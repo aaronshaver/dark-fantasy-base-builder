@@ -42,8 +42,8 @@ final class PathOverlay: SKNode {
         }
         let progress = CGFloat(player.movement?.fraction ?? 0)
         for dot in dots { dot.node.isHidden = dot.distance <= progress }
-        target.isHidden = tiles.count < 2
-        if let destination = tiles.last {
+        target.isHidden = player.destination == nil
+        if let destination = player.destination {
             target.position = CGPoint(x: destination.x * 32, y: destination.y * 32)
         }
     }

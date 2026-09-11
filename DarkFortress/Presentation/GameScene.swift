@@ -22,9 +22,9 @@ final class GameScene: SKScene {
     var onStateChange: ((Simulation) -> Void)?
     var onDeath: (() -> Void)?
 
-    init(size: CGSize, textures: PixelTextures, seed: UInt64? = nil) {
+    init(size: CGSize, textures: PixelTextures, seed: UInt64? = nil, scenario: NewGameScenario = .standard) {
         self.textures = textures
-        simulation = seed.map(Simulation.init(seed:)) ?? Simulation()
+        simulation = Simulation(seed: seed ?? UInt64.random(in: .min ... .max), scenario: scenario)
         pathOverlay = PathOverlay(textures: textures)
         super.init(size: size)
         scaleMode = .resizeFill

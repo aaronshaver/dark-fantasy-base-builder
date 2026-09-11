@@ -1,5 +1,19 @@
 import Foundation
 
+enum NewGameScenario: Int, CaseIterable {
+    case standard, manyAllies, manyEnemies, fiftyEach, hundredEach
+    var counts: (allies: Int, enemies: Int) {
+        switch self {
+        case .standard: return (5, 3)
+        case .manyAllies: return (20, 3)
+        case .manyEnemies: return (3, 20)
+        case .fiftyEach: return (50, 50)
+        case .hundredEach: return (100, 100)
+        }
+    }
+    var title: String { "\(counts.allies) skellies, \(counts.enemies) enemies" }
+}
+
 enum Terrain { case wood, grass }
 
 struct GroundTile {
@@ -55,12 +69,12 @@ struct World {
     @discardableResult
     mutating func damageDoor(at tile: Tile, amount: Int, by affiliation: Affiliation) -> Door? {
         guard let index = roomIndices[tile], rooms[index].door.tile == tile else { return nil }
-        guard affiliation == .hostile || rooms[index].definition.canBeDestroyedByPlayer else { return nil }
+        guard affiliation != rooms[index].door.affiliation || rooms[index].definition.canBeDestroyedByPlayer else { return nil }
         rooms[index].door.health.damage(amount)
         return rooms[index].door
     }
 
-    init(seed: UInt64, rooms suppliedRooms: [Room]? = nil) {
+    init(seed: UInt64, rooms suppliedRooms: [Room]? = nil, scenario: NewGameScenario = .standard) {
         self.seed = seed
         var random = SeededRandom(seed: seed)
         rooms = suppliedRooms ?? [Room(definition: .home, interiorOrigin: Tile(x: -2, y: -2), random: &random)]
@@ -83,15 +97,30 @@ struct World {
         }
         roomIndices = indices
         ground = tiles
-        let edge = tiles.keys.filter { max(abs($0.x), abs($0.y)) == Self.radius && indices[$0] == nil }.sorted()
-        enemyStarts = Array(edge.shuffled(using: &random).prefix(GameBalance.enemyCount))
+        // Fill outer rings first; shuffling before the stable distance tie-break randomizes each ring.
+        let exteriorTiles = tiles.keys.filter { indices[$0] == nil }.sorted().shuffled(using: &random)
+        let enemyCandidates = exteriorTiles.enumerated().sorted {
+            let a = max(abs($0.element.x), abs($0.element.y))
+            let b = max(abs($1.element.x), abs($1.element.y))
+            return a == b ? $0.offset < $1.offset : a > b
+        }.map(\.element)
+        enemyStarts = Array(enemyCandidates.prefix(scenario.counts.enemies))
         let home = rooms.first { $0.playerStart != nil }!
         let occupied = Set([playerStart] + home.chairs.map(\.tile) + enemyStarts)
         let interior = home.interiorTiles.subtracting(occupied).sorted()
-        let exterior = Set(home.walls.keys.flatMap(\.neighbors)).subtracting(home.tiles).subtracting(occupied)
-            .filter { tiles[$0] != nil && indices[$0] == nil }.sorted()
+        var rankedExterior: [(order: Int, tile: Tile, distance: Int)] = []
+        for (order, tile) in exteriorTiles.enumerated() where !occupied.contains(tile) {
+            let distance = home.walls.keys.map { $0.distance(to: tile) }.min()!
+            rankedExterior.append((order, tile, distance))
+        }
+        rankedExterior.sort { lhs, rhs in
+            if lhs.distance != rhs.distance { return lhs.distance < rhs.distance }
+            return lhs.order < rhs.order
+        }
+        let exterior = rankedExterior.map(\.tile)
         allyStarts = Array(interior.shuffled(using: &random).prefix(1))
-            + Array(exterior.shuffled(using: &random).prefix(GameBalance.exteriorSkeletonCount))
+            + Array(exterior.prefix(scenario.counts.allies - 1))
+
     }
 }
 
@@ -105,7 +134,7 @@ enum GameBalance {
     static let playerTilesPerSecond = 2.0
     static let enemyTilesPerSecond = playerTilesPerSecond * 1.5
     static let skeletonTilesPerSecond = enemyTilesPerSecond
-    static let skeletonSenseRadius = 13
+    static let skeletonSenseRadius = 20
     static let skeletonWanderRadius = 2
     static let skeletonIdleInterval = 1...5
     static let attackInterval = 1.0

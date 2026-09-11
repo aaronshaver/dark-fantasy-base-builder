@@ -102,7 +102,7 @@ final class GameViewController: UIViewController {
             guard let self else { return }
             self.pauseForInterruption()
             let menu = AdminViewController()
-            menu.onNewGame = { [weak self] in self?.startNewGame() }
+            menu.onNewGame = { [weak self] scenario in self?.startNewGame(scenario: scenario) }
             menu.onArtworkSaved = { [weak self] pngs in
                 guard let self else { return }
                 try self.textures.replace(pngs)
@@ -121,7 +121,7 @@ final class GameViewController: UIViewController {
         ])
     }
 
-    private func startNewGame() {
+    private func startNewGame(scenario: NewGameScenario = .standard) {
         guard gameView.bounds.width > 0 else { return }
         message.isHidden = true
         let seed: UInt64?
@@ -133,7 +133,7 @@ final class GameViewController: UIViewController {
         #else
         seed = nil
         #endif
-        let scene = GameScene(size: gameView.bounds.size, textures: textures, seed: seed)
+        let scene = GameScene(size: gameView.bounds.size, textures: textures, seed: seed, scenario: scenario)
         scene.onStateChange = { [weak self] simulation in self?.updateHUD(simulation) }
         scene.onDeath = { [weak self] in self?.showDeath() }
         gameScene = scene

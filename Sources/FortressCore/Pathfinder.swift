@@ -1,6 +1,36 @@
 import Foundation
 
 enum Pathfinder {
+    /// One breadth-first search finds the nearest reachable attack position.
+    static func path(from start: Tile, toAny goals: [Tile], world: World,
+                     for affiliation: Affiliation, blocked: Set<Tile>) -> [Tile]? {
+        let goals = Set(goals.filter { !blocked.contains($0) && world.isWalkable($0, for: affiliation) })
+        guard !goals.isEmpty else { return nil }
+        if goals.contains(start) { return [] }
+        var queue = [start], head = 0
+        var visited: Set<Tile> = [start]
+        var predecessor: [Tile: Tile] = [:]
+        while head < queue.count {
+            let current = queue[head]
+            head += 1
+            for next in current.neighbors where !visited.contains(next) {
+                guard !blocked.contains(next), world.isWalkable(next, for: affiliation) else { continue }
+                visited.insert(next)
+                predecessor[next] = current
+                if goals.contains(next) {
+                    var path = [next], cursor = next
+                    while let parent = predecessor[cursor], parent != start {
+                        path.append(parent)
+                        cursor = parent
+                    }
+                    return path.reversed()
+                }
+                queue.append(next)
+            }
+        }
+        return nil
+    }
+
     /// Uniform-cost, orthogonal grid; breadth-first search returns a shortest path.
     /// The source is omitted and the destination is included.
     static func path(from start: Tile, to goal: Tile, world: World, for affiliation: Affiliation,

@@ -43,21 +43,21 @@ final class SkeletonTests: XCTestCase {
         XCTAssertGreaterThan(exteriorSpawns.count, 12)
     }
 
-    func testThirteenTileSensingInterruptsIdlingAndMovementMatchesEnemySpeed() throws {
-        for distance in [13, 14] {
+    func testTwentyTileSensingInterruptsIdlingAndMovementMatchesEnemySpeed() throws {
+        for distance in [20, 21] {
             let player = actor(0, .player, Tile(x: -2, y: -2))
-            let skeleton = actor(1, .allySkeletonMelee, Tile(x: -2, y: 6))
-            var enemy = actor(2, .enemyMeleeSword, Tile(x: distance - 2, y: 6))
+            let skeleton = actor(1, .allySkeletonMelee, Tile(x: -10, y: 6))
+            var enemy = actor(2, .enemyMeleeSword, Tile(x: distance - 10, y: 6))
             enemy.decisionDelay = 100
             let simulation = Simulation(world: World(seed: 14), actors: [player, skeleton, enemy])
             simulation.advance(by: GameBalance.simulationStep)
-            if distance == 13 {
+            if distance == 20 {
                 XCTAssertEqual(simulation.allies[0].skeletonBehavior, .attacking(targetID: 2))
                 let movement = try XCTUnwrap(simulation.allies[0].movement)
                 XCTAssertEqual(movement.duration, 1.0 / 3, accuracy: 0.000001)
-                XCTAssertEqual(movement.to, Tile(x: -1, y: 6))
+                XCTAssertEqual(movement.to, Tile(x: -9, y: 6))
                 advance(simulation, steps: 20)
-                XCTAssertEqual(simulation.allies[0].tile, Tile(x: -1, y: 6))
+                XCTAssertEqual(simulation.allies[0].tile, Tile(x: -9, y: 6))
             } else {
                 XCTAssertEqual(simulation.allies[0].skeletonBehavior, .idling)
                 XCTAssertNil(simulation.allies[0].movement)

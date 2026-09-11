@@ -53,7 +53,13 @@ enum AttackTarget: Equatable { case door(Tile), actor(Int) }
 
 enum SkeletonBehavior: Equatable {
     case idling
-    case attacking(targetID: Int)
+    case attacking(target: AttackTarget)
+
+    static func attacking(targetID: Int) -> Self { .attacking(target: .actor(targetID)) }
+    var target: AttackTarget? {
+        if case .attacking(let target) = self { return target }
+        return nil
+    }
 }
 
 struct Attack {
@@ -91,6 +97,19 @@ struct Actor {
     var destination: Tile?
     var cooldown: Double = 0
     var decisionDelay: Double = 0
+    var failedPathSearches = 0
+    var mustWanderBeforeSensing = false
+
+    mutating func resetPathRetry() {
+        failedPathSearches = 0
+        decisionDelay = 0
+    }
+
+    mutating func recordPathFailure() {
+        failedPathSearches = min(5, failedPathSearches + 1)
+        decisionDelay = min(2, 0.25 * pow(2, Double(min(failedPathSearches - 1, 3))))
+    }
+
     var skeletonBehavior: SkeletonBehavior = .idling
     var idleDecisionDelay: Double = 0
     var affiliation: Affiliation { kind.affiliation }

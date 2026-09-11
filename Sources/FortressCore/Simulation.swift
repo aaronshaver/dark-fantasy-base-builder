@@ -15,8 +15,8 @@ final class Simulation {
     var enemies: [Actor] { actors.filter { $0.affiliation == .hostile } }
     var allies: [Actor] { actors.filter { $0.kind == .allySkeletonMelee } }
 
-    convenience init(seed: UInt64 = UInt64.random(in: .min ... .max)) {
-        let world = World(seed: seed)
+    convenience init(seed: UInt64 = UInt64.random(in: .min ... .max), scenario: NewGameScenario = .standard) {
+        let world = World(seed: seed, scenario: scenario)
         var actors = [Actor(id: 0, kind: .player, tile: world.playerStart,
                         health: Destructible(maximumHP: GameBalance.playerHP, hp: GameBalance.playerHP))]
         actors += world.enemyStarts.enumerated().map { offset, tile in
@@ -45,14 +45,26 @@ final class Simulation {
 
     @discardableResult
     func movePlayer(to destination: Tile) -> Bool {
-        guard !isGameOver, !isPaused, world.isWalkable(destination, for: player.affiliation) else { return false }
-        let start = player.movement?.to ?? player.tile
-        let blocked = occupiedTiles(excluding: 0)
-        guard let route = Pathfinder.path(from: start, to: destination, world: world, for: player.affiliation,
-                                         blocked: blocked, preferStaircase: true) else { return false }
-        actors[0].route = route
+        guard !isGameOver, !isPaused else { return false }
+        // Every tap supersedes the old command, including taps on invalid terrain.
+        stopPlayerRoute()
+        guard world.isWalkable(destination, for: player.affiliation) else { return false }
         actors[0].destination = destination
+        planPlayerRoute(from: player.movement?.to ?? player.tile)
         return true
+    }
+
+    private func planPlayerRoute(from start: Tile) {
+        guard let destination = player.destination else { return }
+        if let route = Pathfinder.path(from: start, to: destination, world: world, for: player.affiliation,
+                                       blocked: occupiedTiles(excluding: 0), preferStaircase: true) {
+            actors[0].route = route
+            actors[0].resetPathRetry()
+        } else {
+            actors[0].route = []
+            actors[0].recordPathFailure()
+            if player.failedPathSearches >= 5 { stopPlayerRoute() }
+        }
     }
 
     func advance(by delta: Double) {
@@ -133,66 +145,124 @@ final class Simulation {
     private func updatePlayer() {
         guard player.movement == nil, let destination = player.destination else { return }
         if player.tile == destination {
-            actors[0].route = []
-            actors[0].destination = nil
+            stopPlayerRoute()
             return
         }
         let blocked = occupiedTiles(excluding: 0)
-        // Replan when units obstruct the route. Stop on a tile if no safe route remains.
-        if player.route.isEmpty || player.route.contains(where: { blocked.contains($0) }) {
-            guard let route = Pathfinder.path(from: player.tile, to: destination, world: world, for: player.affiliation,
-                                             blocked: blocked, preferStaircase: true) else {
-                actors[0].route = []
-                actors[0].destination = nil
-                return
-            }
-            actors[0].route = route
+        if player.route.isEmpty || player.route.contains(where: {
+            blocked.contains($0) || !world.isWalkable($0, for: player.affiliation)
+        }) {
+            actors[0].route = []
+            guard player.decisionDelay <= 0.0000001 else { return }
+            planPlayerRoute(from: player.tile)
         }
         if let next = player.route.first, beginMove(0, to: next) { actors[0].route.removeFirst() }
     }
 
-    private func updateEnemy(_ index: Int) {
-        guard actors[index].isAlive, actors[index].movement == nil, actors[index].attack == nil else { return }
-        guard let target = nearestOpponent(to: index) else { return }
-        pursue(index, targetIndex: target, canBreachDoors: true)
+    private func stopPlayerRoute() {
+        actors[0].route = []
+        actors[0].destination = nil
+        actors[0].resetPathRetry()
     }
 
-    private func nearestOpponent(to index: Int, within radius: Int? = nil) -> Int? {
-        actors.indices.filter {
-            actors[$0].isAlive && actors[$0].affiliation != actors[index].affiliation
-                && (radius == nil || actors[index].tile.distance(to: actors[$0].tile) <= radius!)
-        }.min {
-            let lhs = actors[index].tile.distance(to: actors[$0].tile)
-            let rhs = actors[index].tile.distance(to: actors[$1].tile)
-            return lhs == rhs ? actors[$0].id < actors[$1].id : lhs < rhs
+    /// All targetable destructibles enter the same affiliation-based selection path.
+    private struct CombatTarget {
+        let reference: AttackTarget
+        let tile: Tile
+        let attackTiles: [Tile]
+    }
+
+    private func opponents(to index: Int, within radius: Int? = nil) -> [CombatTarget] {
+        let source = actors[index]
+        var targets = actors.filter { $0.isAlive && $0.affiliation != source.affiliation }.map {
+            CombatTarget(reference: .actor($0.id), tile: $0.movement?.to ?? $0.tile,
+                         attackTiles: ($0.movement?.to ?? $0.tile).neighbors)
+        }
+        targets += world.doors.filter { !$0.health.isDestroyed && $0.affiliation != source.affiliation }.map {
+            CombatTarget(reference: .door($0.tile), tile: $0.tile, attackTiles: $0.attackTiles)
+        }
+        return targets.enumerated().filter {
+            radius == nil || source.tile.distance(to: $0.element.tile) <= radius!
+        }.sorted {
+            let a = source.tile.distance(to: $0.element.tile), b = source.tile.distance(to: $1.element.tile)
+            return a == b ? $0.offset < $1.offset : a < b
+        }.map(\.element)
+    }
+
+    private func updateEnemy(_ index: Int) {
+        guard actors[index].isAlive, actors[index].movement == nil, actors[index].attack == nil,
+              actors[index].decisionDelay <= 0.0000001 else { return }
+        let targets = opponents(to: index)
+        guard !targets.isEmpty else { return }
+        for target in targets {
+            if pursue(index, target: target) { return }
+        }
+        actors[index].recordPathFailure()
+    }
+
+    private func targetIsAlive(_ target: AttackTarget) -> Bool {
+        switch target {
+        case .actor(let id): return actors.contains { $0.id == id && $0.isAlive }
+        case .door(let tile): return world.door(at: tile).map { !$0.health.isDestroyed } ?? false
         }
     }
 
     private func updateSkeleton(_ index: Int) {
         guard actors[index].isAlive else { return }
-        if case .attacking(let id) = actors[index].skeletonBehavior,
-           !actors.contains(where: { $0.id == id && $0.isAlive && $0.affiliation == .hostile }) {
+        if actors[index].mustWanderBeforeSensing {
+            guard actors[index].movement == nil, actors[index].attack == nil else { return }
+            // Suppress sensing until exactly one wander choice completes or fails.
+            if actors[index].destination != nil && actors[index].route.isEmpty {
+                actors[index].destination = nil
+                actors[index].mustWanderBeforeSensing = false
+                return
+            }
+            let attempted = actors[index].destination != nil || actors[index].idleDecisionDelay <= 0
+            wander(index)
+            if attempted && actors[index].destination == nil {
+                actors[index].mustWanderBeforeSensing = false
+            }
+            return
+        }
+        if let selected = actors[index].skeletonBehavior.target,
+           targetIsAlive(selected), (actors[index].movement != nil || actors[index].attack != nil
+                                    || actors[index].decisionDelay > 0.0000001) { return }
+        let allTargets = opponents(to: index)
+        if let selected = actors[index].skeletonBehavior.target,
+           !allTargets.contains(where: { $0.reference == selected }) {
             actors[index].skeletonBehavior = .idling
             actors[index].attack = nil
-            actors[index].decisionDelay = 0
-            actors[index].idleDecisionDelay = Double(Int.random(in: GameBalance.skeletonIdleInterval, using: &random))
+            actors[index].resetPathRetry()
         }
-        // Sensing also runs mid-step; finish the reserved move before changing course.
         if actors[index].skeletonBehavior == .idling,
-           let target = nearestOpponent(to: index, within: GameBalance.skeletonSenseRadius) {
-            actors[index].skeletonBehavior = .attacking(targetID: actors[target].id)
+           let target = allTargets.first(where: { actors[index].tile.distance(to: $0.tile) <= GameBalance.skeletonSenseRadius }) {
+            actors[index].skeletonBehavior = .attacking(target: target.reference)
             actors[index].route = []
             actors[index].destination = nil
-            actors[index].decisionDelay = 0
+            actors[index].resetPathRetry()
         }
         guard actors[index].movement == nil, actors[index].attack == nil else { return }
-        switch actors[index].skeletonBehavior {
-        case .attacking(let id):
-            if let target = actors.firstIndex(where: { $0.id == id && $0.isAlive }) {
-                pursue(index, targetIndex: target, canBreachDoors: false)
+        guard let selected = actors[index].skeletonBehavior.target else { wander(index); return }
+        guard actors[index].decisionDelay <= 0.0000001 else { return }
+        // Keep a successfully chosen target, even after it leaves sensing range.
+        var candidates = allTargets.filter { $0.reference == selected }
+        candidates += allTargets.filter {
+            $0.reference != selected && actors[index].tile.distance(to: $0.tile) <= GameBalance.skeletonSenseRadius
+        }.prefix(3)
+        for target in candidates {
+            if pursue(index, target: target) {
+                actors[index].skeletonBehavior = .attacking(target: target.reference)
+                return
             }
-        case .idling:
-            wander(index)
+        }
+        actors[index].recordPathFailure()
+        if actors[index].failedPathSearches >= 5 {
+            actors[index].resetPathRetry()
+            actors[index].skeletonBehavior = .idling
+            actors[index].mustWanderBeforeSensing = true
+            actors[index].route = []
+            actors[index].destination = nil
+            actors[index].idleDecisionDelay = Double(Int.random(in: GameBalance.skeletonIdleInterval, using: &random))
         }
     }
 
@@ -221,38 +291,26 @@ final class Simulation {
         }
     }
 
-    private func pursue(_ index: Int, targetIndex: Int, canBreachDoors: Bool) {
-        let tile = actors[index].tile
-        if inMeleeRange(index, targetIndex: targetIndex) {
-            beginAttack(index, target: .actor(actors[targetIndex].id), tile: actors[targetIndex].tile)
-            return
+    /// Returns success only for an attack position or a complete route to one.
+    private func pursue(_ index: Int, target: CombatTarget) -> Bool {
+        let inRange: Bool
+        switch target.reference {
+        case .actor(let id):
+            inRange = actors.firstIndex { $0.id == id }.map { inMeleeRange(index, targetIndex: $0) } ?? false
+        case .door:
+            inRange = target.attackTiles.contains(actors[index].tile)
         }
-        guard actors[index].decisionDelay <= 0 else { return }
-        actors[index].decisionDelay = 0.18
-        let affiliation = actors[index].affiliation
-        let target = actors[targetIndex].movement?.to ?? actors[targetIndex].tile
+        if inRange {
+            actors[index].resetPathRetry()
+            beginAttack(index, target: target.reference, tile: target.tile)
+            return true
+        }
         let blocked = occupiedTiles(excluding: actors[index].id)
-        let goals = target.neighbors.filter { world.isWalkable($0, for: affiliation) }
-        let routes = goals.compactMap { Pathfinder.path(from: tile, to: $0, world: world, for: affiliation, blocked: blocked) }
-        if let route = routes.min(by: { $0.count < $1.count }) {
-            if let next = route.first { _ = beginMove(index, to: next) }
-            return
-        }
-
-        // If a door blocks pursuit, plan where to breach it. Actual movement still enforces door access.
-        guard canBreachDoors, let planned = Pathfinder.path(from: tile, to: target, isWalkable: {
-            world.isWalkable($0, for: affiliation) || world.door(at: $0) != nil
-        }), let door = planned.compactMap({ world.door(at: $0) }).first(where: { !$0.allowsPassage(for: affiliation) }) else { return }
-        if door.attackTiles.contains(tile) {
-            beginAttack(index, target: .door(door.tile), tile: door.tile)
-            return
-        }
-        let approaches = door.attackTiles.compactMap {
-            Pathfinder.path(from: tile, to: $0, world: world, for: affiliation, blocked: blocked)
-        }
-        if let route = approaches.min(by: { $0.count < $1.count }), let next = route.first {
-            _ = beginMove(index, to: next)
-        }
+        guard let route = Pathfinder.path(from: actors[index].tile, toAny: target.attackTiles,
+                                           world: world, for: actors[index].affiliation, blocked: blocked),
+              let next = route.first, beginMove(index, to: next) else { return false }
+        actors[index].resetPathRetry()
+        return true
     }
 
     private func beginAttack(_ index: Int, target: AttackTarget, tile: Tile) {
@@ -263,8 +321,10 @@ final class Simulation {
             guard let targetIndex = actors.firstIndex(where: { $0.id == id && $0.isAlive }),
                   actors[targetIndex].affiliation != actors[index].affiliation,
                   inMeleeRange(index, targetIndex: targetIndex) else { return }
-        case .door:
-            guard actors[index].affiliation == .hostile else { return }
+        case .door(let tile):
+            guard let door = world.door(at: tile), !door.health.isDestroyed,
+                  door.affiliation != actors[index].affiliation,
+                  door.attackTiles.contains(actors[index].tile) else { return }
         }
         actors[index].facing = .facing(from: actors[index].tile, to: tile)
         actors[index].attack = Attack(target: target)
@@ -279,8 +339,8 @@ final class Simulation {
             attack.delivered = true
             switch attack.target {
             case .door(let tile):
-                if actors[index].affiliation == .hostile,
-                   let door = world.door(at: tile), !door.health.isDestroyed,
+                if let door = world.door(at: tile), !door.health.isDestroyed,
+                   door.affiliation != actors[index].affiliation,
                    door.attackTiles.contains(actors[index].tile),
                    let damaged = world.damageDoor(at: tile, amount: GameBalance.gateDamage, by: actors[index].affiliation) {
                     events.append(.doorDamaged(tile, damaged.health.hp))
@@ -325,6 +385,7 @@ final class Simulation {
 
     private func endGame() {
         isGameOver = true
+        actors[0].resetPathRetry()
         events.append(.playerDied)
         // Resolve in-flight units onto their exclusively reserved destination before freezing.
         for index in actors.indices {

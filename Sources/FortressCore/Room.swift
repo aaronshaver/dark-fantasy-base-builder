@@ -8,6 +8,7 @@ struct Door {
     let outwardDirection: Direction
     let allowedAffiliations: Set<Affiliation>
     var health: Destructible
+    var affiliation: Affiliation = .friendly
 
     func allowsPassage(for affiliation: Affiliation) -> Bool {
         health.isDestroyed || allowedAffiliations.contains(affiliation)
